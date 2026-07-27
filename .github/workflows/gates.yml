@@ -47,7 +47,7 @@ jobs:
       - name: Declared blind spots
         run: python scripts/oracle.py --blind-spots
 
-      - name: Full gate (29 checks)
+      - name: Full gate (33 checks)
         run: python scripts/sweep.py --verboso
 
       - name: Self-test — prove the gate can go red and recover
