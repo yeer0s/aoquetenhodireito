@@ -1,0 +1,286 @@
+{
+  "_meta": {
+    "versao": "1.0.0",
+    "data": "2026-07-27",
+    "constantes": "IAS 537,13 (2026) · RMMG 920,00 (2026)",
+    "derivacao": "Cada caso foi derivado A MAO a partir do texto legal capturado em assets/law/, e o valor esperado escrito ANTES de correr o motor. O motor tem de o alcancar.",
+    "oraculo_de_flags": "`recusas_esperadas` e um conjunto EXACTO. Uma recusa a mais reprova tanto quanto uma a menos.",
+    "limite_conhecido": "Nenhum caso vem de uma decisao real da Seguranca Social."
+  },
+  "cases": [
+
+    {
+      "id": "sd-01-caso-tipico-35-anos",
+      "porque_existe": "O caso mediano: 35 anos, carreira estavel, 1200 EUR x 14 meses.",
+      "caso": {"idade": 35, "dias_trabalho_24m": 720, "meses_com_registo": 24,
+               "remuneracao_total_12m": 16800, "anos_carreira_ultimos_20": 12,
+               "remuneracoes_atingem_rmmg": true},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 910.00, "dias_total": 480},
+      "recusas_esperadas": [],
+      "deve_conter": ["29", "36"],
+      "derivacao_manual": "16800/360 = 46,6667 EUR/dia. 65% = 30,3333. x30 = 910,00, dentro de [537,13 ; 1342,83]. Duracao: 35 anos + 24 meses -> 420 dias (37.o n.o 1 b) iii). Carreira 12 anos -> 2 quinquenios x 30 dias = 60. Total 480."
+    },
+
+    {
+      "id": "sd-02-tecto-2-5-IAS",
+      "porque_existe": "Salario alto: o art. 29.o n.o 1 corta em 2,5 x IAS. Sem o tecto o motor prometeria 5417 EUR.",
+      "caso": {"idade": 45, "dias_trabalho_24m": 730, "meses_com_registo": 30,
+               "remuneracao_total_12m": 100000, "anos_carreira_ultimos_20": 20,
+               "remuneracoes_atingem_rmmg": true},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 1342.83, "dias_total": 720},
+      "recusas_esperadas": [],
+      "deve_conter": ["29"],
+      "derivacao_manual": "100000/360 = 277,78. 65% = 180,56. x30 = 5416,67 -> cortado a 2,5 x 537,13 = 1342,825 -> 1342,83 (2 casas). Duracao: 45 anos + 30 meses -> 540 (c) iii). Carreira 20 anos -> 4 quinquenios x 45 = 180. Total 720."
+    },
+
+    {
+      "id": "sd-03-piso-1-IAS",
+      "porque_existe": "Salario baixo sem confirmacao de RMMG: o piso do art. 29.o n.o 1 e 1 x IAS.",
+      "caso": {"idade": 25, "dias_trabalho_24m": 400, "meses_com_registo": 14,
+               "remuneracao_total_12m": 6000, "anos_carreira_ultimos_20": 2},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 537.13, "dias_total": 150},
+      "recusas_esperadas": [],
+      "deve_conter": ["29"],
+      "derivacao_manual": "6000/360 = 16,667. 65% = 10,833. x30 = 325,00 < 537,13 -> elevado ao piso. Duracao: 25 anos + 14 meses -> 150 (a) i). Carreira 2 anos -> 0 quinquenios. Total 150."
+    },
+
+    {
+      "id": "sd-04-piso-majorado-1-15-IAS",
+      "porque_existe": "O art. 29.o n.o 5 eleva o piso a 1,15 x IAS quando as remuneracoes atingem a RMMG. So se aplica quando o utilizador o CONFIRMA - a media anual pode atingir a RMMG sem que as remuneracoes mensais a atinjam.",
+      "caso": {"idade": 25, "dias_trabalho_24m": 400, "meses_com_registo": 14,
+               "remuneracao_total_12m": 6000, "anos_carreira_ultimos_20": 2,
+               "remuneracoes_atingem_rmmg": true},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 617.70, "dias_total": 150},
+      "recusas_esperadas": [],
+      "deve_conter": ["29"],
+      "derivacao_manual": "Mesmo caso do sd-03 mas com a RMMG confirmada: 1,15 x 537,13 = 617,6995 -> 617,70. Sem confirmacao dava 537,13 - uma diferenca de 80,57 EUR/mes que o utilizador so recebe se declarar o facto."
+    },
+
+    {
+      "id": "sd-05-nao-cumpre-prazo-de-garantia",
+      "porque_existe": "359 dias em 24 meses: falha o art. 22.o n.o 1 por um dia. A saida NAO pode terminar aqui - o art. 22.o n.os 2 e 3 abre o subsidio social com 180 ou 120 dias, e quem parar de ler perde uma prestacao a que pode ter direito.",
+      "caso": {"idade": 35, "dias_trabalho_24m": 359, "meses_com_registo": 12,
+               "remuneracao_total_12m": 12000},
+      "esperado": {"estado": "NAO_CUMPRE_PRAZO_DE_GARANTIA"},
+      "recusas_esperadas": [],
+      "deve_conter": ["22", "180", "120"],
+      "derivacao_manual": "359 < 360. Tem de encaminhar para o subsidio social."
+    },
+
+    {
+      "id": "sd-06-fronteira-exacta-360-dias",
+      "porque_existe": "360 dias exactos CUMPREM: o art. 22.o n.o 1 diz `de 360 dias`, nao `mais de`. Um `>` em vez de `>=` negaria a prestacao a quem tem exactamente o minimo.",
+      "caso": {"idade": 35, "dias_trabalho_24m": 360, "meses_com_registo": 12,
+               "remuneracao_total_12m": 12000},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 650.00, "dias_total": 180},
+      "recusas_esperadas": [],
+      "deve_conter": ["22"],
+      "derivacao_manual": "12000/360 = 33,333. 65% = 21,667. x30 = 650,00, dentro dos limites. Duracao: 35 anos + 12 meses -> 180 (b) i). Sem quinquenios declarados."
+    },
+
+    {
+      "id": "sd-07-fronteira-idade-30",
+      "porque_existe": "Aos 30 anos exactos aplica-se a alinea b), nao a a): `igual ou superior a 30`. A fronteira vale 30 dias de base (150 -> 180).",
+      "caso": {"idade": 30, "dias_trabalho_24m": 400, "meses_com_registo": 10,
+               "remuneracao_total_12m": 12000},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 650.00, "dias_total": 180},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "30 anos -> alinea b). 10 meses < 15 -> b) i) = 180 dias."
+    },
+
+    {
+      "id": "sd-08-fronteira-idade-29",
+      "porque_existe": "O par do anterior: aos 29 ainda e a alinea a) i) = 150 dias. Os dois juntos fixam a fronteira nos dois sentidos.",
+      "caso": {"idade": 29, "dias_trabalho_24m": 400, "meses_com_registo": 10,
+               "remuneracao_total_12m": 12000},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 650.00, "dias_total": 150},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "29 anos -> alinea a). 10 meses < 15 -> a) i) = 150 dias."
+    },
+
+    {
+      "id": "sd-09-quinquenios-truncam",
+      "porque_existe": "`por cada cinco anos` conta quinquenios COMPLETOS. 9 anos dao UM acrescimo, nao 1,8. Um arredondamento em vez de truncatura daria 24 dias a mais.",
+      "caso": {"idade": 45, "dias_trabalho_24m": 730, "meses_com_registo": 24,
+               "remuneracao_total_12m": 20000, "anos_carreira_ultimos_20": 9},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 1083.33, "dias_total": 585},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "20000/360 = 55,556. 65% = 36,111. x30 = 1083,33 (< tecto 1342,83). Duracao: 45 anos + 24 meses -> 540 (c) iii). 9 anos // 5 = 1 quinquenio x 45 = 45. Total 585."
+    },
+
+    {
+      "id": "sd-10-idade-50-acrescimo-maior",
+      "porque_existe": "A partir dos 50 o acrescimo e de 60 dias por quinquenio (al. c) do n.o 2), o dobro da faixa mais nova.",
+      "caso": {"idade": 55, "dias_trabalho_24m": 730, "meses_com_registo": 24,
+               "remuneracao_total_12m": 24000, "anos_carreira_ultimos_20": 20},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 1300.00, "dias_total": 780},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "24000/360 = 66,667. 65% = 43,333. x30 = 1300,00 (< tecto). Duracao: 55 anos + 24 meses -> 540 (d) iii). 20 // 5 = 4 quinquenios x 60 = 240. Total 780."
+    },
+
+    {
+      "id": "sd-11-carreira-longa-trunca-aos-20-anos",
+      "porque_existe": "DEFEITO ENCONTRADO POR REVISAO ADVERSARIAL, 2026-07-27. O art. 37.o n.o 2 diz `por cada cinco anos com registo de remuneracoes NOS ULTIMOS 20 ANOS` - o maximo sao 4 quinquenios. Nenhum dos dois caminhos aplicava esse tecto: 30 anos de carreira davam 6 quinquenios e o motor prometia 900 dias onde a lei da 780. Quatro meses de rendimento que nao existem, e logo ao utilizador tipico da faixa dos 50+, que responde `30` a pergunta `quantos anos de carreira`. O ORACULO TINHA A MESMA OMISSAO e confirmava o erro - a falha correlacionada que o oracle.py declara como limite dos dois caminhos.",
+      "caso": {"idade": 55, "dias_trabalho_24m": 730, "meses_com_registo": 24,
+               "remuneracao_total_12m": 24000, "anos_carreira_ultimos_20": 30},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 1300.00, "dias_total": 780},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "24000/360 = 66,667. 65% = 43,333. x30 = 1300,00. Duracao: 540 (d) iii) + min(30,20)//5 = 4 quinquenios x 60 = 240. Total 780 - o maximo legal da faixa."
+    },
+
+    {
+      "id": "sd-12-exactamente-20-anos-e-o-tecto",
+      "porque_existe": "O par do anterior: 20 anos exactos ja dao os 4 quinquenios. Os dois juntos provam que o tecto e um tecto e nao um corte cego - 20 e 30 anos tem de dar o MESMO resultado, e 19 tem de dar menos.",
+      "caso": {"idade": 55, "dias_trabalho_24m": 730, "meses_com_registo": 24,
+               "remuneracao_total_12m": 24000, "anos_carreira_ultimos_20": 20},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 1300.00, "dias_total": 780},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "20//5 = 4 quinquenios x 60 = 240. 540+240 = 780. Igual ao sd-11."
+    },
+
+    {
+      "id": "sd-13-dezanove-anos-da-menos",
+      "porque_existe": "19 anos dao 3 quinquenios, nao 4. Sem este caso, um tecto implementado como `min(anos,20)` e um implementado como `quinquenios=4` fixo seriam indistinguiveis.",
+      "caso": {"idade": 55, "dias_trabalho_24m": 730, "meses_com_registo": 24,
+               "remuneracao_total_12m": 24000, "anos_carreira_ultimos_20": 19},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 1300.00, "dias_total": 720},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "19//5 = 3 quinquenios x 60 = 180. 540+180 = 720."
+    },
+
+    {
+      "id": "sd-14-celula-a-ii",
+      "porque_existe": "Cobertura da tabela do art. 37.o. Sete das doze celulas nao tinham caso dourado e estavam protegidas apenas pela transcricao duplicada - o mesmo mecanismo que falhou silenciosamente no sd-11.",
+      "caso": {"idade": 22, "dias_trabalho_24m": 500, "meses_com_registo": 18,
+               "remuneracao_total_12m": 12000},
+      "esperado": {"estado": "TEM_DIREITO", "dias_total": 210},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "< 30 anos, 15 <= 18 < 24 -> a) ii) = 210 dias. Sem quinquenios."
+    },
+
+    {
+      "id": "sd-15-celula-a-iii",
+      "porque_existe": "Cobertura da tabela: alinea a) iii).",
+      "caso": {"idade": 22, "dias_trabalho_24m": 730, "meses_com_registo": 26,
+               "remuneracao_total_12m": 12000},
+      "esperado": {"estado": "TEM_DIREITO", "dias_total": 330},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "< 30 anos, 26 >= 24 -> a) iii) = 330 dias."
+    },
+
+    {
+      "id": "sd-16-celula-b-ii",
+      "porque_existe": "Cobertura da tabela: alinea b) ii). Note-se que b) ii) e a) iii) valem ambos 330 dias - uma troca entre eles seria invisivel sem os dois casos.",
+      "caso": {"idade": 34, "dias_trabalho_24m": 500, "meses_com_registo": 20,
+               "remuneracao_total_12m": 12000},
+      "esperado": {"estado": "TEM_DIREITO", "dias_total": 330},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "30-39 anos, 15 <= 20 < 24 -> b) ii) = 330 dias."
+    },
+
+    {
+      "id": "sd-17-celula-c-i",
+      "porque_existe": "Cobertura da tabela: alinea c) i). Vale 210, tal como a) ii) - outro par confundivel.",
+      "caso": {"idade": 44, "dias_trabalho_24m": 400, "meses_com_registo": 12,
+               "remuneracao_total_12m": 12000},
+      "esperado": {"estado": "TEM_DIREITO", "dias_total": 210},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "40-49 anos, 12 < 15 -> c) i) = 210 dias."
+    },
+
+    {
+      "id": "sd-18-celula-c-ii",
+      "porque_existe": "Cobertura da tabela: alinea c) ii).",
+      "caso": {"idade": 44, "dias_trabalho_24m": 500, "meses_com_registo": 18,
+               "remuneracao_total_12m": 12000},
+      "esperado": {"estado": "TEM_DIREITO", "dias_total": 360},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "40-49 anos, 15 <= 18 < 24 -> c) ii) = 360 dias."
+    },
+
+    {
+      "id": "sd-19-celula-d-i",
+      "porque_existe": "Cobertura da tabela: alinea d) i).",
+      "caso": {"idade": 58, "dias_trabalho_24m": 400, "meses_com_registo": 12,
+               "remuneracao_total_12m": 12000},
+      "esperado": {"estado": "TEM_DIREITO", "dias_total": 270},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "50+ anos, 12 < 15 -> d) i) = 270 dias."
+    },
+
+    {
+      "id": "sd-20-celula-d-ii",
+      "porque_existe": "Cobertura da tabela: alinea d) ii). Com esta, as doze celulas ficam todas pinadas por um caso dourado.",
+      "caso": {"idade": 58, "dias_trabalho_24m": 500, "meses_com_registo": 18,
+               "remuneracao_total_12m": 12000},
+      "esperado": {"estado": "TEM_DIREITO", "dias_total": 480},
+      "recusas_esperadas": [],
+      "deve_conter": ["37"],
+      "derivacao_manual": "50+ anos, 15 <= 18 < 24 -> d) ii) = 480 dias."
+    },
+
+    {
+      "id": "rec-01-trabalhador-independente",
+      "porque_existe": "O DL 220/2006 cobre `trabalhadores por conta de outrem`. Aplicar estes numeros a um independente daria um resultado confiante e errado.",
+      "caso": {"idade": 35, "dias_trabalho_24m": 720, "meses_com_registo": 24,
+               "remuneracao_total_12m": 16800,
+               "factos": {"trabalhador_independente": true}},
+      "esperado": {"estado": "RECUSA"},
+      "recusas_esperadas": ["trabalhador_independente"],
+      "deve_conter": ["8"],
+      "derivacao_manual": "Recusa por art. 8.o n.o 1."
+    },
+
+    {
+      "id": "rec-02-saida-voluntaria",
+      "porque_existe": "Art. 9.o: sem desemprego involuntario nao ha direito. Mas a resolucao com JUSTA CAUSA pelo trabalhador (n.o 1 al. c) E involuntaria - a recusa tem de o dizer, senao afasta quem tem direito.",
+      "caso": {"idade": 35, "dias_trabalho_24m": 720, "meses_com_registo": 24,
+               "remuneracao_total_12m": 16800,
+               "factos": {"saida_voluntaria_sem_justa_causa": true}},
+      "esperado": {"estado": "RECUSA"},
+      "recusas_esperadas": ["saida_voluntaria_sem_justa_causa"],
+      "deve_conter": ["9", "JUSTA CAUSA"],
+      "derivacao_manual": "Recusa por art. 9.o n.o 6, com a ressalva da al. c) do n.o 1."
+    },
+
+    {
+      "id": "rec-03-condicao-de-recursos",
+      "porque_existe": "O subsidio SOCIAL depende de uma escala de equivalencia (DL 70/2010) que nao esta capturada. Calcular a capitacao sem ela seria inventar. O limiar de 80% do IAS e dado como indicativo E rotulado como tal.",
+      "caso": {"idade": 35, "dias_trabalho_24m": 200, "meses_com_registo": 8,
+               "remuneracao_total_12m": 8000,
+               "factos": {"condicao_de_recursos": true}},
+      "esperado": {"estado": "RECUSA"},
+      "recusas_esperadas": ["condicao_de_recursos"],
+      "deve_conter": ["24", "429.70"],
+      "derivacao_manual": "Recusa por art. 24.o n.o 2. Indicativo: 80% de 537,13 = 429,704 -> 429,70."
+    },
+
+    {
+      "id": "rec-04-multiplas",
+      "porque_existe": "Varios obstaculos em simultaneo tem de aparecer TODOS. Reportar so o primeiro esconderia os outros.",
+      "caso": {"idade": 35, "dias_trabalho_24m": 720, "meses_com_registo": 24,
+               "remuneracao_total_12m": 16800,
+               "factos": {"trabalhador_independente": true, "nao_reside_em_portugal": true,
+                          "subsidio_parcial": true}},
+      "esperado": {"estado": "RECUSA"},
+      "recusas_esperadas": ["nao_reside_em_portugal", "subsidio_parcial",
+                            "trabalhador_independente"],
+      "deve_conter": [],
+      "derivacao_manual": "Tres portas, tres recusas."
+    }
+
+  ]
+}

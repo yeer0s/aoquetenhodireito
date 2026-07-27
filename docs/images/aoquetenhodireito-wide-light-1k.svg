@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" width="1000" height="300" role="img" aria-label="aoquetenhodireito">
+  <rect width="1000" height="300" rx="14" fill="#ffffff"/>
+  <rect x="0.5" y="0.5" width="999" height="299" rx="14" fill="none" stroke="#d1d9e0"/>
+
+  <!-- an open door with a calendar-shaped light coming through: a period of support -->
+  <g transform="translate(64,80)">
+    <rect x="0" y="0" width="96" height="130" rx="6" fill="none" stroke="#59636e" stroke-width="3"/>
+    <path d="M96 12 L136 0 L136 130 L96 118 Z" fill="none" stroke="#0969da" stroke-width="3"
+          stroke-linejoin="round"/>
+    <circle cx="86" cy="66" r="4" fill="#59636e"/>
+    <line x1="110" y1="34" x2="126" y2="30" stroke="#0969da" stroke-width="3" stroke-linecap="round"/>
+    <line x1="110" y1="62" x2="126" y2="58" stroke="#0969da" stroke-width="3" stroke-linecap="round"/>
+    <line x1="110" y1="90" x2="126" y2="86" stroke="#0969da" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <text x="236" y="108" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="46" font-weight="700" fill="#1f2328">aoquetenhodireito</text>
+  <text x="236" y="146" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="21" fill="#59636e">Subsídio de desemprego · Portugal</text>
+
+  <g font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="14">
+    <g transform="translate(236,172)">
+      <rect width="212" height="30" rx="15" fill="#f6f8fa" stroke="#d1d9e0"/>
+      <text x="16" y="20" fill="#1a7f37">DR · versão consolidada</text>
+    </g>
+    <g transform="translate(460,172)">
+      <rect width="168" height="30" rx="15" fill="#f6f8fa" stroke="#d1d9e0"/>
+      <text x="16" y="20" fill="#1a7f37">29 verificações</text>
+    </g>
+    <g transform="translate(640,172)">
+      <rect width="150" height="30" rx="15" fill="#f6f8fa" stroke="#d1d9e0"/>
+      <text x="16" y="20" fill="#1a7f37">0 dependências</text>
+    </g>
+    <g transform="translate(802,172)">
+      <rect width="126" height="30" rx="15" fill="#f6f8fa" stroke="#d1d9e0"/>
+      <text x="16" y="20" fill="#1a7f37">sem rede</text>
+    </g>
+  </g>
+
+  <text x="236" y="240" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="16" fill="#59636e">Tem direito? Quanto? Até quando? — com o artigo por trás de cada número.</text>
+  <text x="236" y="266" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="13" fill="#0969da">art. 22.º · art. 28.º · art. 29.º · art. 37.º</text>
+</svg>
