@@ -1,0 +1,109 @@
+name: gates
+
+# Every claim the README makes is checked here, on every push, across four Python
+# versions and three operating systems. Nobody has to take "zero network calls",
+# "two independent implementations" or "the gate knows how to fail" on trust.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Monthly, and deliberately on the 1st. The IAS and the RMMG change every
+    # January: this run turns "nobody remembered to update the constants" from a
+    # silent wrong answer into a red build, without anyone having to remember.
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: ${{ matrix.os }} · py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: No dependencies to install
+        run: |
+          python -c "import sys; print(sys.version)"
+          echo "Standard library only, by design."
+
+      - name: Dual-path crosscheck (4704 combinations)
+        run: python scripts/oracle.py --crosscheck
+
+      - name: Mutation test — restore the dead 2012/13 uplift, demand red
+        run: python scripts/oracle.py --mutation-test
+
+      - name: Declared blind spots
+        run: python scripts/oracle.py --blind-spots
+
+      - name: Full gate (29 checks)
+        run: python scripts/sweep.py --verboso
+
+      - name: Self-test — prove the gate can go red and recover
+        run: python scripts/sweep.py --self-test
+
+      - name: Mutants against the product invariants
+        run: python scripts/mutants.py
+
+      - name: Offline audit (AST)
+        run: python scripts/offline_audit.py
+
+      - name: Offline audit self-test — prove the audit can fail
+        run: python scripts/offline_audit.py --selftest
+
+  no-network:
+    name: prove it runs with networking disabled
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The offline audit is static. This is the dynamic counterpart: every socket
+      # constructor is poisoned before the engine is imported, so any attempt to
+      # reach the network raises instead of succeeding quietly.
+      - name: Run the whole gate with sockets disabled
+        run: |
+          cat > sitecustomize.py <<'PY'
+          import socket
+
+          class _Blocked(RuntimeError):
+              pass
+
+          def _deny(*a, **k):
+              raise _Blocked("network access attempted in an offline-only project")
+
+          socket.socket = _deny
+          socket.create_connection = _deny
+          socket.socketpair = _deny
+          PY
+          PYTHONPATH=. python scripts/sweep.py
+          PYTHONPATH=. python scripts/oracle.py --crosscheck
+          PYTHONPATH=. python scripts/mutants.py
+
+  constantes:
+    name: annual constants are current
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Called out as its own job so that "the IAS is a year out of date" is
+      # legible at a glance instead of buried in 29 lines of output. This is the
+      # failure mode most likely to ship a confidently wrong number.
+      - name: IAS and RMMG match the current year
+        run: python scripts/sweep.py --verboso

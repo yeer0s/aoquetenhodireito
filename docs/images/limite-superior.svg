@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" role="img" aria-label="porque o valor e um limite superior">
+<rect width="900" height="340" fill="#ffffff"/>
+<text x="32" y="42" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="22" font-weight="700" fill="#1f2328">Porque é que o valor é um limite superior</text>
+<text x="32" y="68" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15" fill="#59636e">Este motor percorre os três primeiros passos. O quarto exige a sua retenção de IRS, que ele nunca pergunta.</text>
+<g transform="translate(32,92)">
+<rect width="836" height="52" rx="8" fill="#f6f8fa" stroke="#d1d9e0"/>
+<rect width="6" height="52" rx="3" fill="#1a7f37"/>
+<text x="24" y="23" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="15" font-weight="700" fill="#1f2328">R / 360</text>
+<text x="24" y="42" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#59636e">remuneração de referência diária</text>
+<text x="818" y="32" text-anchor="end" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12" fill="#1a7f37">art. 28.º n.º 4</text>
+</g>
+<g transform="translate(32,152)">
+<rect width="836" height="52" rx="8" fill="#f6f8fa" stroke="#d1d9e0"/>
+<rect width="6" height="52" rx="3" fill="#1a7f37"/>
+<text x="24" y="23" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="15" font-weight="700" fill="#1f2328">× 65 % × 30</text>
+<text x="24" y="42" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#59636e">montante mensal bruto</text>
+<text x="818" y="32" text-anchor="end" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12" fill="#1a7f37">art. 28.º n.º 1</text>
+</g>
+<g transform="translate(32,212)">
+<rect width="836" height="52" rx="8" fill="#f6f8fa" stroke="#d1d9e0"/>
+<rect width="6" height="52" rx="3" fill="#1a7f37"/>
+<text x="24" y="23" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="15" font-weight="700" fill="#1f2328">entre 1 e 2,5 × IAS</text>
+<text x="24" y="42" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#59636e">piso e tecto aplicados</text>
+<text x="818" y="32" text-anchor="end" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12" fill="#1a7f37">art. 29.º n.os 1 e 5</text>
+</g>
+<g transform="translate(32,272)">
+<rect width="836" height="52" rx="8" fill="#f6f8fa" stroke="#d1d9e0"/>
+<rect width="6" height="52" rx="3" fill="#bc4c00"/>
+<text x="24" y="23" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="15" font-weight="700" fill="#1f2328">≤ 75 % do LÍQUIDO</text>
+<text x="24" y="42" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13" fill="#59636e">NÃO CALCULADO — depende do seu IRS</text>
+<text x="818" y="32" text-anchor="end" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="12" fill="#bc4c00">art. 29.º n.os 2 a 4</text>
+</g>
+<text x="32" y="348" font-family="ui-sans-serif,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="14" font-weight="700" fill="#bc4c00">O valor real pode ser MENOR. Nunca maior. Não assine uma renda com base nele.</text>
+</svg>

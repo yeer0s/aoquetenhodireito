@@ -1,0 +1,20 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 🏛️ A resposta que vale — Segurança Social
+    url: https://www.seg-social.pt
+    about: "Só a Segurança Social decide o seu direito, o montante e a duração. Segurança Social Direta ou 300 502 502."
+  - name: 💼 Inscrição no centro de emprego (obrigatória)
+    url: https://www.iefp.pt
+    about: "A inscrição no IEFP é condição do subsídio. E o art. 36.º n.º 1 conta desde o REQUERIMENTO — cada dia de atraso é um dia que não recebe."
+  - name: ⚖️ A decisão foi indeferida e quero contestar
+    url: https://www.seg-social.pt/protecao-juridica
+    about: "Apoio judiciário (proteção jurídica) pode cobrir honorários e custas. Este repositório não o pode representar."
+  - name: 🆘 Estou sem rendimento neste momento
+    url: https://www.seg-social.pt/rendimento-social-de-insercao
+    about: "RSI, apoios de emergência e ação social. Se falhou o prazo de garantia, veja também o subsídio SOCIAL de desemprego."
+  - name: 🧮 Projetos irmãos
+    url: https://github.com/yeer0s/porreceber
+    about: "porreceber (prescrição de dívidas), Ao Cêntimo (IRS) e recibosegarantia — offline, MIT, mesma família."
+  - name: 🇵🇹 Ferramentas e guias gratuitos
+    url: https://mowei.pt
+    about: "Mowei — energia, telecom, seguros, banca, crédito, apoios."

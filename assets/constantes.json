@@ -1,0 +1,47 @@
+{
+  "_meta": {
+    "versao": "1.0.0",
+    "ano_vigente": 2026,
+    "aviso": "Estas constantes MUDAM TODOS OS ANOS. Um motor de apoios sociais com constantes do ano passado devolve numeros errados com toda a confianca. sweep.py FALHA se `ano_vigente` ficar para tras do ano corrente do sistema - a suite fica vermelha sozinha em 1 de Janeiro, sem ninguem se lembrar."
+  },
+
+  "IAS": {
+    "valor": 537.13,
+    "ano": 2026,
+    "fonte": "Portaria n.o 480-A/2025/1, de 30 de dezembro",
+    "anterior": {"valor": 522.50, "ano": 2025},
+    "porque_importa": "Art. 29.o n.o 1: o subsidio mensal nao pode exceder 2,5 x IAS nem ser inferior a 1 x IAS. Art. 29.o n.o 5: piso majorado de 1,15 x IAS. Art. 30.o n.o 1: o subsidio social e 100%/80% do IAS. Art. 24.o n.o 2: a condicao de recursos e 80% do IAS."
+  },
+
+  "RMMG": {
+    "valor": 920.00,
+    "ano": 2026,
+    "fonte": "Decreto-Lei n.o 139/2025, de 29 de dezembro",
+    "anterior": {"valor": 870.00, "ano": 2025},
+    "porque_importa": "Art. 29.o n.o 5: o piso de 1,15 IAS so se aplica se as remuneracoes de base corresponderem PELO MENOS a RMMG. Art. 30.o n.o 4: majoracao por filho e 1/30 de 10% da retribuicao minima."
+  },
+
+  "derivados": {
+    "tecto_mensal_2_5_IAS": 1342.83,
+    "piso_mensal_1_IAS": 537.13,
+    "piso_majorado_1_15_IAS": 617.70,
+    "limiar_condicao_recursos_80pc_IAS": 429.70,
+    "majoracao_diaria_por_filho": 3.07,
+    "nota": "Derivados sao recalculados e VERIFICADOS por sweep.py a partir de IAS e RMMG. Nao sao fonte - sao um espelho, e existem so para que uma divergencia entre o texto e o calculo fique visivel."
+  },
+
+  "taxa_subsidio": {
+    "percentagem": 0.65,
+    "artigo": "28.o n.o 1",
+    "base_dias_mes": 30
+  },
+
+  "majoracoes_nao_vigentes": [
+    {
+      "descricao": "Majoracao de 10% do montante diario",
+      "diplomas": ["Lei n.o 66-B/2012, art. 118.o", "Lei n.o 83-C/2013, art. 116.o"],
+      "estado": "NAO VIGENTE",
+      "porque_esta_aqui": "Aparecem como Notas ao art. 28.o na versao consolidada do DR e sao faceis de confundir com direito vigente. Foram medidas dos Orcamentos de 2012 e 2013. Aplica-las hoje inflacionaria o resultado em 10%. Registadas explicitamente para que ninguem as 'reponha' por engano."
+    }
+  ]
+}

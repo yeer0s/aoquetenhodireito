@@ -1,0 +1,83 @@
+name: A Segurança Social apurou um valor diferente
+description: O montante ou a duração que recebeu não bate certo com o que o motor calculou
+labels: ["correção", "decisão real"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Este é o contributo mais valioso que este repositório pode receber.**
+
+        O maior limite declarado do projeto é que nenhum caso de teste vem de uma
+        decisão real da Segurança Social — o corpus prova coerência com o texto
+        legal, não com a prática do ISS. Uma divergência real vale mais do que
+        qualquer refactor.
+
+        ⚠️ **Não cole dados pessoais.** Nome, NISS, NIF e morada não são precisos.
+        Idade, dias, meses e totais chegam. Se preferir, arredonde os valores —
+        a proporção é o que interessa.
+
+  - type: textarea
+    id: inputs
+    attributes:
+      label: O que introduziu
+      description: O comando ou o JSON do caso, anonimizado.
+      render: shell
+      placeholder: python scripts/desemprego.py --idade 35 --dias-trabalho-24m 720 --meses-com-registo 24 --remuneracao-total-12m 16800
+    validations:
+      required: true
+
+  - type: textarea
+    id: calculado
+    attributes:
+      label: O que o motor calculou
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: real
+    attributes:
+      label: O que a Segurança Social apurou
+      description: Montante mensal e/ou número de dias de concessão.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tipo
+    attributes:
+      label: Onde está a divergência
+      options:
+        - Montante mensal
+        - Duração (dias de concessão)
+        - Disse que tinha direito e foi indeferido
+        - Disse que não tinha direito e foi deferido
+        - Outro
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: tecto
+    attributes:
+      label: Antes de submeter — a causa mais provável
+      description: |
+        Se o valor real é MENOR do que o calculado, é muito provável que seja o
+        tecto do art. 29.º n.os 2 e 3 (75 % do valor LÍQUIDO da remuneração de
+        referência). Esse tecto depende da sua retenção de IRS e o motor
+        assume-se incapaz de o calcular — está documentado, não é um bug.
+
+        Continua a valer a pena abrir o issue: saber com que frequência e com que
+        magnitude isso acontece ajuda a calibrar o aviso.
+      options:
+        - label: Li o acima e o valor real é MENOR do que o calculado (provavelmente o tecto do art. 29.º).
+        - label: O valor real é MAIOR do que o calculado — isto NÃO devia acontecer e é um defeito.
+        - label: A divergência é na duração, não no montante.
+
+  - type: checkboxes
+    id: confirmacoes
+    attributes:
+      label: Confirmações
+      options:
+        - label: Não incluí dados pessoais.
+          required: true
+        - label: Percebo que este repositório não me pode representar nem alterar a decisão da Segurança Social.
+          required: true
