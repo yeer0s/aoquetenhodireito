@@ -80,6 +80,23 @@ baixa-o para **120 dias** quando o desemprego vem da caducidade de um contrato a
 termo. Quem parar de ler no "não tem direito" perde uma prestação a que pode ter
 direito — e há uma verificação que falha se essa saída não encaminhar.
 
+## Já recebeu subsídio antes? Diga-o
+
+O art. 37.º n.º 3 manda contar, para a duração, só o registo de remunerações
+**posterior ao termo** da concessão anterior. Quem já recebeu subsídio e não o
+declara recebe o cálculo bruto — o de sempre — com o aviso de que a duração real
+pode ser **menor**. Quem o declara tem de dizer quanto registo houve depois:
+
+```bash
+python scripts/desemprego.py --idade 35 --dias-trabalho-24m 500        --meses-com-registo 60 --remuneracao-total-12m 12000 --anos-carreira-20 12        --beneficio-anterior sim --meses-apos-anterior 18 --anos-apos-anterior 1
+#   => 330 dias, onde a contagem bruta dava 480
+```
+
+Se retomou trabalho nos **primeiros seis meses** da prestação anterior, o n.º 4
+soma o período que ela considerou (`--retomou-6-meses sim` e as duas contagens
+dessa prestação). Declarar sem os números **rebenta** — cair em silêncio na
+contagem bruta seria usar exactamente a contagem que o n.º 3 proíbe.
+
 ## O que se recusa a calcular
 
 | Facto | Porquê | Artigo |
@@ -99,18 +116,20 @@ Uma ferramenta que responde a tudo está a mentir sobre alguma coisa.
 Não por a suite estar verde. Por ela **saber ficar vermelha**:
 
 ```bash
-python scripts/oracle.py --crosscheck      # 4704 combinações, dois caminhos independentes
+python scripts/oracle.py --crosscheck      # 108960 combinações, dois caminhos independentes
 python scripts/oracle.py --mutation-test   # repõe a majoração morta de 2012/13 e exige vermelho
 python scripts/oracle.py --blind-spots     # o que este motor NÃO cobre
 python scripts/sweep.py --self-test        # prova que o gate sabe falhar e voltar a passar
 python scripts/mutants.py                  # mutantes contra os invariantes de produto
-python scripts/sweep.py                    # 33 verificações
+python scripts/sweep.py                    # 37 verificações
 python scripts/offline_audit.py            # prova estática: sem caminho de importação para a rede
 ```
 
 - **Dois caminhos independentes.** O motor faz `(R/360) × 0,65 × 30`; o oráculo faz
   `(R/12) × 0,65` e **nunca divide por 360**. A duração é resolvida por procura em
   fronteiras ordenadas em vez de varrimento de tabela.
+  O art. 37.º n.os 3–4 é lido pelo oráculo como um conjunto de **períodos
+  admitidos** que se somam, e não como ajustes a um número.
   *Limite honesto:* são algebricamente equivalentes, por isso apanham erros de
   transcrição e de arredondamento, **não** erros de leitura da lei. Para esses
   servem a captura verbatim e a revisão adversarial.
@@ -126,7 +145,9 @@ python scripts/offline_audit.py            # prova estática: sem caminho de imp
   sempre que a estimativa **assume desemprego involuntário** nos termos do art.
   9.º; explica-se sempre a janela de R do art. 28.º n.º 4; falhar o prazo
   encaminha para o subsídio social; avisa-se sempre que o art. 36.º n.º 1 conta
-  desde o **requerimento**, não desde o desemprego. Cada um tem um mutante em
+  desde o **requerimento**, não desde o desemprego; declarar uma prestação
+  anterior **nunca alonga** a duração face ao cálculo bruto, e **encurta-a** quando
+  o art. 37.º n.º 3 o manda. Cada um tem um mutante em
   `scripts/mutants.py` que prova que a verificação morde.
 
 ## Offline
@@ -154,6 +175,60 @@ foram todos mexidos.
 ---
 
 ## Changelog
+
+### v1.1.0 — 2026-09-28
+
+**O limite declarado que se fechou: art. 37.º n.os 3–4.** Até aqui o motor contava
+todo o registo de remunerações para a duração, e dizia — honestamente — que quem
+já recebeu subsídio podia ter uma duração menor. «Pode ser menor» não é um número.
+A pessoa do caso `sd-21` (35 anos, 60 meses de registo, mas só 18 depois do termo
+da prestação anterior) lia **480 dias**; a lei dá-lhe **330**. Cinco meses de
+rendimento que não existem — exactamente a direcção de erro que este repositório
+diz ser a perigosa.
+
+**O que muda, e o que não muda:**
+
+- O n.º 3 é aplicado quando o utilizador declara uma prestação anterior
+  (`beneficio_anterior`) e o registo **posterior ao termo** dela, em meses (n.º 1)
+  e em anos (n.º 2).
+- O n.º 4 soma o período que a prestação anterior considerou, se a pessoa retomou
+  actividade nos primeiros seis meses dela.
+- **Sem o facto, o número é o de sempre.** A ausência nunca torna a resposta mais
+  generosa do que a v1.0.0 — e há uma verificação que o exige, e que exige também
+  que a saída nomeie o n.º 3 e diga como o declarar.
+- Declarar a prestação sem os números **rebenta**. Cair na contagem bruta seria
+  usar, em silêncio, a contagem que o n.º 3 proíbe.
+
+**Onde o texto capturado não chega, e o que se fez em vez de adivinhar:**
+
+- O n.º 4 não diz se a janela de 20 anos do n.º 2 se aplica ao período somado.
+  O motor nunca conta mais do que o total que o utilizador declarou — a leitura
+  mais curta. O caso `sd-22` mostra a diferença: 480 dias em vez de 510.
+- O n.º 3 não diz se o «termo» de uma prestação interrompida por retoma é o fim do
+  pagamento ou o fim do período concedido. A ajuda da opção manda contar a partir
+  do **mais tardio**.
+- O **n.º 5** (acréscimos não gozados) não diz como dias não gozados se convertem
+  em períodos de registo. **Não é modelado.** Só pode alongar — o erro fica do lado
+  seguro, e a saída di-lo.
+- O art. 22.º n.º 1 capturado não diz se os dias já tidos em conta numa prestação
+  anterior contam de novo para o prazo de garantia. A saída avisa; não decide.
+
+**Como se sabe que morde:** 6 casos dourados novos, cada um com a aritmética à mão
+na nota; 4 verificações novas, todas de comportamento; 4 mutantes novos, um por
+verificação; e o crosscheck passa de 4704 para 108960 combinações, com o histórico
+de prestações a correr contra um oráculo que lê o artigo como períodos admitidos.
+Reverter o n.º 3 no motor põe o crosscheck, os casos dourados e a verificação
+dedicada a vermelho ao mesmo tempo.
+
+**Uma contagem que estava errada:** a v1.0.0 dizia «23 casos dourados»; eram 24.
+Nenhuma verificação lia esse número. Agora são 30.
+
+**Estado:** 30 casos dourados, 37 verificações, 17 mutantes, 108960 combinações.
+
+**Limites que continuam declarados:** o tecto do art. 29.º n.os 2–3; o art. 37.º
+n.º 5; o art. 36.º n.º 5 (dias deduzidos por requerimento fora de prazo, via art.
+72.º n.º 2, não capturado); o subsídio social; nenhum caso dourado vem de uma
+decisão real.
 
 ### v1.0.0 — 2026-07-27
 
@@ -218,6 +293,7 @@ as doze estão pinadas.
 - O art. 37.º n.os 3–5 (períodos já usados num desemprego anterior, retoma de
   trabalho nos primeiros seis meses) **não está modelado**: quem já recebeu
   subsídio antes pode ter uma duração **menor** do que a calculada.
+  *(Os n.os 3 e 4 passaram a ser modelados na v1.1.0; o n.º 5 continua fora.)*
 - Nenhum caso dourado vem de uma decisão real da Segurança Social.
 - O subsídio social de desemprego é porta de recusa enquanto o DL 70/2010 não
   estiver capturado.

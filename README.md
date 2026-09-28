@@ -13,7 +13,7 @@
   <a href="#licença--licence"><img src="https://img.shields.io/badge/licence-MIT-blue.svg" alt="MIT"></a>
   <img src="https://img.shields.io/badge/dependencies-0-brightgreen.svg" alt="zero dependencies">
   <img src="https://img.shields.io/badge/network-none-brightgreen.svg" alt="no network">
-  <img src="https://img.shields.io/badge/checks-33-brightgreen.svg" alt="33 checks">
+  <img src="https://img.shields.io/badge/checks-37-brightgreen.svg" alt="37 checks">
   <img src="https://img.shields.io/badge/statute-consolidated%20DR-informational.svg" alt="statute">
 </p>
 
@@ -115,12 +115,12 @@ A tool that answers everything is lying about something.
 Not because the suite is green. Because it **knows how to go red**:
 
 ```bash
-python scripts/oracle.py --crosscheck      # 4704 combinations, two independent paths
+python scripts/oracle.py --crosscheck      # 108960 combinations, two independent paths
 python scripts/oracle.py --mutation-test   # restores the dead 2012/13 uplift, demands red
 python scripts/oracle.py --blind-spots     # what this engine does NOT cover
 python scripts/sweep.py --self-test        # proves the gate can fail and recover
 python scripts/mutants.py                  # mutants against the product invariants
-python scripts/sweep.py                    # 33 checks
+python scripts/sweep.py                    # 37 checks
 python scripts/offline_audit.py            # static proof: no import/call path to the network
 ```
 
@@ -142,7 +142,9 @@ python scripts/offline_audit.py            # static proof: no import/call path t
   state that entitlement assumes involuntary unemployment under art. 9.º; always
   explain the art. 28.º n.º 4 window for R; always route a failed qualifying period
   to the social benefit; always warn that art. 36.º n.º 1 counts from the **claim
-  date**, not the job-loss date. Each has a mutant proving the check bites.
+  date**, not the job-loss date; declaring a previous benefit **never lengthens**
+  the duration, and shortens it where art. 37.º n.º 3 says so. Each has a mutant
+  proving the check bites.
 
 ## Fully offline — structurally, not as a promise
 

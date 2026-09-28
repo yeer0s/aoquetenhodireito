@@ -175,7 +175,7 @@ def m_sem_assuncao_involuntariedade():
 
 
 def m_sem_caveat_da_duracao():
-    """Deixa de dizer que a duração também é um limite superior (art. 37.º n.os 3-5)."""
+    """Deixa de dizer que a duração também é um limite superior (arts. 37.º n.º 3 e 36.º n.º 5)."""
     def t(out):
         out.pop("a_duracao_tambem_pode_ser_menor", None)
         return out
@@ -190,7 +190,69 @@ def m_sem_janela_de_R():
     return _patch_analisar(t)
 
 
+def _patch_contagem(transform):
+    orig = desemprego.contagem_37_3_4
+
+    def patched(meses, anos, caso):
+        return transform(orig, meses, anos, caso or {})
+    desemprego.contagem_37_3_4 = patched
+    return lambda: setattr(desemprego, "contagem_37_3_4", orig)
+
+
+def m_ignora_37_3():
+    """Esquece o art. 37.º n.º 3: conta o registo TODO mesmo com prestação anterior.
+
+    É exactamente o motor da v1.0.0 perante quem já recebeu subsídio.
+    """
+    def t(orig, meses, anos, caso):
+        c = orig(meses, anos, caso)
+        c["meses"], c["anos"] = meses, anos
+        return c
+    return _patch_contagem(t)
+
+
+def m_37_4_sem_tecto_do_declarado():
+    """Soma o período do n.º 4 sem o limitar ao total declarado: a parte passa o todo."""
+    def t(orig, meses, anos, caso):
+        c = orig(meses, anos, caso)
+        if c["regra"] == "n3+n4":
+            c["meses"] = caso["meses_com_registo_apos_anterior"] + \
+                caso["meses_considerados_no_anterior"]
+            c["anos"] = caso["anos_carreira_apos_anterior"] + \
+                caso["anos_considerados_no_anterior"]
+        return c
+    return _patch_contagem(t)
+
+
+def m_ausente_cala_o_37_3():
+    """Sem histórico declarado, deixa de nomear o art. 37.º n.º 3 na ressalva da duração."""
+    def t(out):
+        if out.get("duracao", {}).get("regra_art_37_3") == "desconhecido":
+            out["a_duracao_tambem_pode_ser_menor"] = (
+                "A duracao acima e igualmente um limite superior.")
+        return out
+    return _patch_analisar(t)
+
+
+def m_anterior_sem_contagem_usa_bruto():
+    """Prestação anterior declarada sem contagens: cai em silêncio na contagem bruta."""
+    def t(orig, meses, anos, caso):
+        if caso.get("beneficio_anterior") is True and (
+                caso.get("meses_com_registo_apos_anterior") is None
+                or caso.get("anos_carreira_apos_anterior") is None):
+            return {"meses": meses, "anos": anos, "regra": "desconhecido",
+                    "passos": [], "avisos": []}
+        return orig(meses, anos, caso)
+    return _patch_contagem(t)
+
+
 MUTANTES = [
+    ("ignora-37-3", m_ignora_37_3, "art-37-3-encurta-quando-deve"),
+    ("37-4-sem-tecto-do-declarado", m_37_4_sem_tecto_do_declarado,
+     "art-37-3-nunca-alonga-a-duracao"),
+    ("ausente-cala-o-37-3", m_ausente_cala_o_37_3, "art-37-3-ausente-igual-a-v1-e-avisa"),
+    ("anterior-sem-contagem-usa-bruto", m_anterior_sem_contagem_usa_bruto,
+     "art-37-3-declarado-sem-contagem-rebenta"),
     ("quinquenios-sem-tecto", m_quinquenios_sem_tecto,
      "acrescimo-limitado-a-4-quinquenios"),
     ("sem-assuncao-involuntariedade", m_sem_assuncao_involuntariedade,

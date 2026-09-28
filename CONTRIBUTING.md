@@ -70,8 +70,11 @@ READMEs — há uma verificação que falha de propósito quando essa contagem e
    legal, não com a prática do ISS. Se recebeu um valor diferente do calculado,
    isso vale mais do que qualquer refactor. Abra um issue com os *inputs* (sem
    dados pessoais) e o valor apurado.
-2. **O art. 37.º n.os 3 a 5** — períodos já usados num desemprego anterior. Está
-   por modelar e é a razão pela qual a duração calculada pode ser optimista.
+2. **O art. 37.º n.º 5** — acréscimos não gozados por retoma antes de esgotar a
+   prestação anterior. Os n.os 3 e 4 estão modelados desde a v1.1.0; o n.º 5 não,
+   porque o texto não diz como dias não gozados se convertem em registo. Um
+   contributo que traga o diploma ou a norma regulamentar que o diga vale mais do
+   que uma leitura.
 3. **O DL n.º 70/2010** (escala de equivalência da condição de recursos), que
    destrancaria o subsídio social de desemprego.
 

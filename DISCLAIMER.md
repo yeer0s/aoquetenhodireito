@@ -16,8 +16,9 @@ The short version:
 - **You supply the figures; you own the decision.** A one-day error in the
   qualifying period changes the result and passes every test here. Confirm your
   real numbers in Segurança Social Direta.
-- **Art. 37.º n.os 3–5 is not modelled** — a previous unemployment claim may mean
-  a **shorter** duration than calculated.
+- **Art. 37.º n.os 3–4 applies only if you declare a previous benefit** — left
+  undeclared, a previous unemployment claim may mean a **shorter** duration than
+  calculated. N.º 5 is not modelled.
 - **No warranty**, under MIT.
 
 `AVISO-FORMAL.md` is a **notice**, not a licence condition. The software is MIT,

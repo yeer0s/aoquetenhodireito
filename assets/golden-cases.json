@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "versao": "1.0.0",
-    "data": "2026-07-27",
+    "versao": "1.1.0",
+    "data": "2026-09-28",
     "constantes": "IAS 537,13 (2026) · RMMG 920,00 (2026)",
     "derivacao": "Cada caso foi derivado A MAO a partir do texto legal capturado em assets/law/, e o valor esperado escrito ANTES de correr o motor. O motor tem de o alcancar.",
     "oraculo_de_flags": "`recusas_esperadas` e um conjunto EXACTO. Uma recusa a mais reprova tanto quanto uma a menos.",
@@ -230,6 +230,85 @@
       "recusas_esperadas": [],
       "deve_conter": ["37"],
       "derivacao_manual": "50+ anos, 15 <= 18 < 24 -> d) ii) = 480 dias."
+    },
+
+    {
+      "id": "sd-21-art37-3-so-conta-apos-o-termo",
+      "porque_existe": "Art. 37.o n.o 3: quem ja recebeu prestacoes de desemprego so conta, para os n.os 1 e 2, o registo POSTERIOR ao termo dessa concessao. Ate a v1.0.0 o motor contava o total e prometia 480 dias a esta pessoa - cinco meses que a lei nao da.",
+      "caso": {"idade": 35, "dias_trabalho_24m": 500, "meses_com_registo": 60,
+               "remuneracao_total_12m": 12000, "anos_carreira_ultimos_20": 12,
+               "beneficio_anterior": true,
+               "meses_com_registo_apos_anterior": 18, "anos_carreira_apos_anterior": 1},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 650.00, "dias_total": 330},
+      "recusas_esperadas": [],
+      "deve_conter": ["37.o n.o 3", "Prazo de garantia com prestacao anterior"],
+      "derivacao_manual": "Montante: 12000/360 = 33,333; 65% = 21,667; x30 = 650,00. Duracao pelo n.o 3: meses = min(60, 18) = 18 -> 35 anos, 15 <= 18 < 24 -> b) ii) = 330. Anos = min(12, 1) = 1 -> 1//5 = 0 quinquenios -> 0. Total 330. Contagem bruta (o calculo da v1.0.0): 60 >= 24 -> b) iii) 420 + 12//5 = 2 x 30 = 60 -> 480. Diferenca: 150 dias."
+    },
+
+    {
+      "id": "sd-22-art37-4-soma-o-periodo-anterior-com-tecto",
+      "porque_existe": "Art. 37.o n.o 4: retomou actividade nos primeiros seis meses da prestacao anterior, logo soma-se o periodo que essa prestacao teve em conta. Os anos somados (15) passam o total declarado nos ultimos 20 anos (12): o texto nao diz se a janela de 20 anos do n.o 2 se aplica ao periodo do n.o 4, e o motor le pela via mais curta.",
+      "caso": {"idade": 35, "dias_trabalho_24m": 500, "meses_com_registo": 60,
+               "remuneracao_total_12m": 12000, "anos_carreira_ultimos_20": 12,
+               "beneficio_anterior": true,
+               "meses_com_registo_apos_anterior": 18, "anos_carreira_apos_anterior": 1,
+               "retomou_nos_primeiros_6_meses": true,
+               "meses_considerados_no_anterior": 30, "anos_considerados_no_anterior": 14},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 650.00, "dias_total": 480},
+      "recusas_esperadas": [],
+      "deve_conter": ["37.o n.o 4", "via mais curta"],
+      "derivacao_manual": "Meses: 18 + 30 = 48 <= 60 declarados -> 48 >= 24 -> b) iii) = 420. Anos: 1 + 14 = 15 > 12 declarados -> 12 -> 12//5 = 2 quinquenios x 30 = 60. Total 480. A leitura sem o tecto do total declarado daria 15//5 = 3 x 30 = 90 -> 510; o texto nao a exclui nem a impoe, e 510 seria o erro perigoso se estivesse errada."
+    },
+
+    {
+      "id": "sd-23-art37-4-sem-contagens-fica-no-n3",
+      "porque_existe": "Declarou a retoma nos primeiros seis meses mas nao os periodos que a prestacao anterior considerou. O n.o 4 nao pode ser aplicado sem numeros; o motor fica no n.o 3 (a leitura mais curta) e di-lo.",
+      "caso": {"idade": 35, "dias_trabalho_24m": 500, "meses_com_registo": 60,
+               "remuneracao_total_12m": 12000, "anos_carreira_ultimos_20": 12,
+               "beneficio_anterior": true,
+               "meses_com_registo_apos_anterior": 18, "anos_carreira_apos_anterior": 1,
+               "retomou_nos_primeiros_6_meses": true},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 650.00, "dias_total": 330},
+      "recusas_esperadas": [],
+      "deve_conter": ["37.o n.o 4 NAO aplicado"],
+      "derivacao_manual": "Igual ao sd-21: min(60, 18) = 18 -> b) ii) = 330; min(12, 1) = 1 -> 0 quinquenios. Total 330."
+    },
+
+    {
+      "id": "sd-24-nunca-recebeu-contagem-bruta",
+      "porque_existe": "Quem declara que nunca recebeu prestacoes de desemprego nao tem termo de concessao anterior: o n.o 3 nao encurta nada. A duracao continua rotulada como limite superior pelo art. 36.o n.o 5.",
+      "caso": {"idade": 45, "dias_trabalho_24m": 730, "meses_com_registo": 30,
+               "remuneracao_total_12m": 24000, "anos_carreira_ultimos_20": 20,
+               "beneficio_anterior": false},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 1300.00, "dias_total": 720},
+      "recusas_esperadas": [],
+      "deve_conter": ["nunca recebeu", "36.o n.o 5"],
+      "derivacao_manual": "24000/360 = 66,667; 65% = 43,333; x30 = 1300,00. 45 anos, 30 >= 24 -> c) iii) = 540. 20//5 = 4 quinquenios x 45 = 180. Total 720."
+    },
+
+    {
+      "id": "sd-25-historico-ausente-igual-a-v1-com-aviso",
+      "porque_existe": "Sem o facto, o numero e exactamente o da v1.0.0 - a ausencia nunca pode tornar a resposta MAIS generosa - e a saida diz qual e a regra que pode encurta-lo e como a declarar.",
+      "caso": {"idade": 55, "dias_trabalho_24m": 730, "meses_com_registo": 24,
+               "remuneracao_total_12m": 24000, "anos_carreira_ultimos_20": 20},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 1300.00, "dias_total": 780},
+      "recusas_esperadas": [],
+      "deve_conter": ["37.o n.o 3", "--beneficio-anterior"],
+      "derivacao_manual": "Igual ao sd-12: 55 anos, 24 meses -> d) iii) = 540; 20//5 = 4 x 60 = 240. Total 780."
+    },
+
+    {
+      "id": "sd-26-art37-3-corta-o-acrescimo-aos-50",
+      "porque_existe": "Aos 50+ o n.o 3 pode deixar a celula do n.o 1 intacta e cortar so o acrescimo do n.o 2. Sem este caso, uma implementacao que aplicasse o n.o 3 aos meses e esquecesse os anos passaria no sd-21 (onde 1 ano ja da 0 quinquenios).",
+      "caso": {"idade": 55, "dias_trabalho_24m": 730, "meses_com_registo": 120,
+               "remuneracao_total_12m": 24000, "anos_carreira_ultimos_20": 20,
+               "beneficio_anterior": true,
+               "meses_com_registo_apos_anterior": 24, "anos_carreira_apos_anterior": 9,
+               "retomou_nos_primeiros_6_meses": false},
+      "esperado": {"estado": "TEM_DIREITO", "montante_mensal": 1300.00, "dias_total": 600},
+      "recusas_esperadas": [],
+      "deve_conter": ["37.o n.o 3", "37.o n.o 5"],
+      "derivacao_manual": "Meses = min(120, 24) = 24 -> d) iii) = 540 (a mesma celula que a contagem bruta). Anos = min(20, 9) = 9 -> 9//5 = 1 quinquenio x 60 = 60. Total 600. Contagem bruta: 540 + 4 x 60 = 780. Diferenca: 180 dias, todos do n.o 2."
     },
 
     {

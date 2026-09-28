@@ -37,7 +37,7 @@ import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
-ALGORITHM_VERSION = "1.0.0"
+ALGORITHM_VERSION = "1.1.0"
 
 for _s in (sys.stdout, sys.stderr):
     try:
@@ -110,6 +110,139 @@ def periodo_concessao(idade, meses_registo, anos_carreira_20=0):
     anos_relevantes = min(int(anos_carreira_20), 20)
     quinquenios = anos_relevantes // 5
     return base, passo * quinquenios, alinea, quinquenios, alm
+
+
+# ------------------------------------------------- art. 37.o n.os 3 e 4
+#
+# N.o 3: "Para efeitos do disposto nos numeros anteriores sao considerados os
+# periodos de registo de remuneracoes posteriores ao termo da concessao das
+# prestacoes devidas pela ultima situacao de desemprego, sem prejuizo do disposto
+# no numero seguinte."
+#   -> quem ja recebeu prestacoes de desemprego so conta, para os n.os 1 (meses)
+#      e 2 (anos), o registo POSTERIOR ao termo dessa concessao.
+#
+# N.o 4: quem retomou actividade "no decurso dos primeiros seis meses de
+# atribuicao" ve ainda considerado, na prestacao imediatamente subsequente, "o
+# periodo de remuneracoes tido em conta na atribuicao da prestacao ... anterior".
+#   -> soma-se o periodo que a prestacao anterior considerou.
+#
+# O que o texto NAO diz, e por isso se le pela via mais curta:
+#   - se o periodo do n.o 4 fica sujeito a janela de 20 anos do n.o 2, e como se
+#     cruza com o total que o utilizador declara. O motor nunca conta MAIS do que
+#     o total declarado (meses_com_registo / anos_carreira_ultimos_20);
+#   - o n.o 5 (acrescimos nao gozados por retoma antes de esgotar o periodo) nao
+#     diz como se convertem dias nao gozados em periodos de registo. NAO e
+#     modelado. So pode ALONGAR - o erro fica do lado seguro, e e declarado.
+#
+# Ausencia do facto = o calculo de sempre (contagem bruta), com o aviso de que o
+# n.o 3 pode encurtar. Nunca mais generoso do que antes desta regra existir.
+
+CHAVES_HISTORICO = ("beneficio_anterior", "meses_com_registo_apos_anterior",
+                    "anos_carreira_apos_anterior", "retomou_nos_primeiros_6_meses",
+                    "meses_considerados_no_anterior", "anos_considerados_no_anterior")
+
+
+def _tri(caso, chave):
+    v = caso.get(chave)
+    if v is not None and not isinstance(v, bool):
+        raise ValueError("%s tem de ser true, false ou ausente (recebido %r)" % (chave, v))
+    return v
+
+
+def _contagem(caso, chave):
+    v = caso.get(chave)
+    if v is None:
+        return None
+    if isinstance(v, bool) or int(v) != v or int(v) < 0:
+        raise ValueError("%s tem de ser um inteiro >= 0 (recebido %r)" % (chave, v))
+    return int(v)
+
+
+def contagem_37_3_4(meses_registo, anos_carreira_20, caso):
+    """Art. 37.o n.os 3 e 4. Devolve o dict com os meses e anos a levar aos n.os 1 e 2.
+
+    Falha fechado: declarar um beneficio anterior sem dizer quanto registo houve
+    depois dele rebenta, em vez de cair em silencio na contagem bruta - que e
+    exactamente a contagem que o n.o 3 proibe.
+    """
+    ant = _tri(caso, "beneficio_anterior")
+    retomou = _tri(caso, "retomou_nos_primeiros_6_meses")
+    m_apos = _contagem(caso, "meses_com_registo_apos_anterior")
+    a_apos = _contagem(caso, "anos_carreira_apos_anterior")
+    m_ant = _contagem(caso, "meses_considerados_no_anterior")
+    a_ant = _contagem(caso, "anos_considerados_no_anterior")
+    passos, avisos = [], []
+
+    if ant is not True:
+        soltos = [k for k, v in (("meses_com_registo_apos_anterior", m_apos),
+                                 ("anos_carreira_apos_anterior", a_apos),
+                                 ("retomou_nos_primeiros_6_meses", retomou),
+                                 ("meses_considerados_no_anterior", m_ant),
+                                 ("anos_considerados_no_anterior", a_ant)) if v is not None]
+        if soltos:
+            raise ValueError("%s so faz sentido com beneficio_anterior=true (art. 37.o "
+                             "n.os 3-4); recebido beneficio_anterior=%r"
+                             % (", ".join(soltos), ant))
+        return {"meses": meses_registo, "anos": anos_carreira_20,
+                "regra": "desconhecido" if ant is None else "sem_anterior",
+                "passos": passos, "avisos": avisos}
+
+    if m_apos is None or a_apos is None:
+        raise ValueError("beneficio_anterior=true exige meses_com_registo_apos_anterior e "
+                         "anos_carreira_apos_anterior: o art. 37.o n.o 3 so conta o registo "
+                         "POSTERIOR ao termo da concessao anterior, e sem esses numeros o "
+                         "motor teria de usar a contagem bruta, que sobrestima a duracao.")
+
+    meses_ef, anos_ef, regra = m_apos, a_apos, "n3"
+    passos.append("Art. 37.o n.o 3: so contam os periodos de registo posteriores ao termo "
+                  "da concessao anterior -> %d meses, %d anos." % (m_apos, a_apos))
+
+    if retomou is True and m_ant is not None and a_ant is not None:
+        meses_ef, anos_ef, regra = m_apos + m_ant, a_apos + a_ant, "n3+n4"
+        passos.append("Art. 37.o n.o 4: retomou actividade nos primeiros seis meses da "
+                      "prestacao anterior -> soma-se o periodo que ela considerou: "
+                      "%d + %d = %d meses, %d + %d = %d anos."
+                      % (m_apos, m_ant, meses_ef, a_apos, a_ant, anos_ef))
+    elif retomou is True:
+        avisos.append("Art. 37.o n.o 4 NAO aplicado: declarou que retomou actividade nos "
+                      "primeiros seis meses da prestacao anterior, mas nao indicou os meses "
+                      "e anos que essa prestacao considerou. O motor usa so o n.o 3 - a "
+                      "leitura mais curta. A duracao real pode ser MAIOR.")
+    elif retomou is None:
+        avisos.append("Se retomou actividade nos primeiros seis meses da prestacao anterior, "
+                      "o art. 37.o n.o 4 manda considerar tambem o periodo de remuneracoes "
+                      "que ela teve em conta. Nao foi declarado: o motor usa so o n.o 3.")
+
+    if meses_ef > meses_registo:
+        passos.append("Nunca mais do que o total declarado: %d meses -> %d."
+                      % (meses_ef, meses_registo))
+        meses_ef = meses_registo
+    if anos_ef > anos_carreira_20:
+        passos.append("Nunca mais do que o total declarado nos ultimos 20 anos: %d anos -> %d. "
+                      "O texto do n.o 4 nao diz se a janela de 20 anos do n.o 2 se lhe aplica; "
+                      "o motor le-o pela via mais curta." % (anos_ef, anos_carreira_20))
+        anos_ef = anos_carreira_20
+
+    avisos.append("Art. 37.o n.o 5 NAO modelado: se retomou trabalho antes de esgotar a "
+                  "prestacao anterior e nao chegou a gozar os acrescimos do n.o 2, os periodos "
+                  "que nao foram considerados relevam agora para o acrescimo. O texto nao diz "
+                  "como se convertem, pelo que o acrescimo real pode ser MAIOR do que o "
+                  "mostrado - nunca menor por esta razao.")
+    avisos.append("Prazo de garantia com prestacao anterior: o art. 22.o n.o 1 capturado conta "
+                  "360 dias em 24 meses e nao diz se os dias ja tidos em conta na prestacao "
+                  "anterior podem voltar a contar. Este motor nao o sabe. Se nao puderem, pode "
+                  "NAO cumprir - confirme na Seguranca Social Direta.")
+    return {"meses": meses_ef, "anos": anos_ef, "regra": regra,
+            "passos": passos, "avisos": avisos}
+
+
+def duracao(idade, meses_registo, anos_carreira_20, caso=None):
+    """Art. 37.o n.os 1 a 4, encadeados. O que o analisar() e o crosscheck usam."""
+    c = contagem_37_3_4(int(meses_registo), int(anos_carreira_20), caso or {})
+    base, acresc, alinea, quinq, alm = periodo_concessao(idade, c["meses"], c["anos"])
+    return {"dias_base": base, "acrescimo_dias": acresc, "alinea": alinea,
+            "quinquenios_contados": quinq, "alinea_acrescimo": alm,
+            "dias_total": base + acresc, "contagem": c}
 
 
 # ------------------------------------------------------------------- montante
@@ -293,7 +426,11 @@ def analisar(caso, const=None):
     idade = int(caso["idade"])
     meses = int(caso["meses_com_registo"])
     anos20 = int(caso.get("anos_carreira_ultimos_20") or 0)
-    base, acresc, alinea, quinq, alm = periodo_concessao(idade, meses, anos20)
+    d = duracao(idade, meses, anos20, caso)
+    c = d["contagem"]
+    base, acresc, alinea, quinq, alm = (d["dias_base"], d["acrescimo_dias"], d["alinea"],
+                                        d["quinquenios_contados"], d["alinea_acrescimo"])
+    avisos.extend(c["avisos"])
     out["duracao"] = {
         "dias_base": base,
         "artigo_base": "37.o n.o 1 al. %s" % alinea,
@@ -302,6 +439,10 @@ def analisar(caso, const=None):
         "quinquenios_contados": quinq,
         "dias_total": base + acresc,
         "meses_aproximados": round((base + acresc) / 30.0, 1),
+        "regra_art_37_3": c["regra"],
+        "meses_contados": c["meses"],
+        "anos_contados": c["anos"],
+        "passos": c["passos"],
     }
 
     out["estado"] = "TEM_DIREITO"
@@ -311,6 +452,10 @@ def analisar(caso, const=None):
         "n.o 1 al. %s, mais %d dias de acrescimo pelo n.o 2 (%d quinquenios de carreira)."
         % (dias, m["montante_mensal"], base + acresc, (base + acresc) / 30.0,
            base, alinea, acresc, quinq))
+    if c["regra"] in ("n3", "n3+n4"):
+        out["o_que_isto_significa"] += (
+            " Contados so os periodos que o art. 37.o n.o 3%s admite: %d meses, %d anos."
+            % (" e o n.o 4" if c["regra"] == "n3+n4" else "", c["meses"], c["anos"]))
 
     # A frase que nao pode faltar. Ver o docstring do modulo.
     out["este_valor_e_um_limite_superior"] = (
@@ -349,11 +494,31 @@ def analisar(caso, const=None):
         "devidos nesse periodo. Compensacoes por cessacao do contrato NAO entram. Os "
         "seus valores reais estao na Seguranca Social Direta.")
 
-    out["a_duracao_tambem_pode_ser_menor"] = (
-        "A duracao acima e igualmente um limite superior. O art. 37.o n.os 3 a 5 manda "
-        "descontar periodos ja usados num desemprego anterior, e este motor NAO os "
-        "modela. Se ja recebeu subsidio de desemprego antes, ou retomou trabalho "
-        "durante uma atribuicao, o periodo real pode ser MENOR.")
+    # O art. 36.o n.o 5 deduz ao periodo de concessao os dias de atraso nas
+    # situacoes do art. 72.o n.o 2 (nao capturado). Continua a ser razao para a
+    # duracao poder ser menor, com ou sem o art. 37.o n.o 3.
+    dur_36_5 = ("O art. 36.o n.o 5 deduz ao periodo de concessao os dias decorridos entre "
+                "o termo do prazo e a apresentacao do requerimento ou das provas, nas "
+                "situacoes do art. 72.o n.o 2, que este motor nao modela.")
+    if c["regra"] == "desconhecido":
+        out["a_duracao_tambem_pode_ser_menor"] = (
+            "A duracao acima e igualmente um limite superior. NAO declarou se ja recebeu "
+            "prestacoes de desemprego antes. Se recebeu, o art. 37.o n.o 3 so conta os "
+            "periodos de registo POSTERIORES ao termo dessa concessao, e o periodo real "
+            "pode ser MENOR - declare-o (--beneficio-anterior) para o motor o aplicar. "
+            + dur_36_5)
+    elif c["regra"] == "sem_anterior":
+        out["a_duracao_tambem_pode_ser_menor"] = (
+            "A duracao acima e igualmente um limite superior. Declarou que nunca recebeu "
+            "prestacoes de desemprego, pelo que o art. 37.o n.o 3 nao encurta a contagem. "
+            + dur_36_5 + " E os meses e anos sao os que declarou: os reais estao na "
+            "Seguranca Social Direta.")
+    else:
+        out["a_duracao_tambem_pode_ser_menor"] = (
+            "Aplicado o art. 37.o n.o 3%s. A duracao pode ainda ser MENOR: %s E pode ser "
+            "MAIOR pelo art. 37.o n.o 5, que nao e modelado - o motor mostra a leitura "
+            "mais curta que o texto consente, nunca a mais longa."
+            % (" e o n.o 4" if c["regra"] == "n3+n4" else "", dur_36_5))
 
     out["prazos_a_nao_perder"] = (
         "O art. 36.o n.o 1 diz que as prestacoes sao devidas DESDE A DATA DO "
@@ -405,10 +570,17 @@ def _render(out):
         L.append("")
         d = out["duracao"]
         L.append("DURACAO")
+        for s in d.get("passos", []):
+            L.append("  . " + s)
         L.append("  . base:      %3d dias  (art. %s)" % (d["dias_base"], d["artigo_base"]))
         L.append("  . acrescimo: %3d dias  (art. %s, %d quinquenios)"
                  % (d["acrescimo_dias"], d["artigo_acrescimo"], d["quinquenios_contados"]))
         L.append("  => %d dias  (~%.1f meses)" % (d["dias_total"], d["meses_aproximados"]))
+        L.append("")
+    if out.get("avisos"):
+        L.append("AVISOS")
+        for a in out["avisos"]:
+            L.append("  ! " + a)
         L.append("")
     L.append("O QUE ISTO SIGNIFICA")
     L.append("  " + out["o_que_isto_significa"])
@@ -454,6 +626,29 @@ def main(argv=None):
     p.add_argument("--atinge-rmmg", action="store_true",
                    help="as remuneracoes mensais que serviram de base atingem a RMMG "
                         "(art. 29.o n.o 5: eleva o piso a 1,15 x IAS)")
+    p.add_argument("--beneficio-anterior", choices=("sim", "nao"),
+                   help="ja recebeu prestacoes de desemprego numa situacao anterior? "
+                        "(art. 37.o n.o 3). Omitido = desconhecido: calculo bruto, com o "
+                        "aviso de que a duracao pode ser menor. 'sim' exige as duas "
+                        "opcoes seguintes")
+    p.add_argument("--meses-apos-anterior", type=int,
+                   help="meses com registo de remuneracoes POSTERIORES ao termo da "
+                        "concessao anterior (art. 37.o n.o 3). Se retomou trabalho antes "
+                        "de esgotar essa prestacao, o texto nao diz se o termo e a data em "
+                        "que deixou de receber ou o fim do periodo concedido: conte a "
+                        "partir da MAIS TARDIA (a leitura mais curta)")
+    p.add_argument("--anos-apos-anterior", type=int,
+                   help="anos com registo de remuneracoes, nos ultimos 20, POSTERIORES ao "
+                        "termo da concessao anterior (art. 37.o n.os 2 e 3)")
+    p.add_argument("--retomou-6-meses", choices=("sim", "nao"),
+                   help="retomou actividade nos PRIMEIROS SEIS MESES da prestacao anterior? "
+                        "(art. 37.o n.o 4)")
+    p.add_argument("--meses-considerados-anterior", type=int,
+                   help="meses de registo que a prestacao anterior teve em conta (art. 37.o "
+                        "n.o 4; estao na decisao de atribuicao dessa prestacao)")
+    p.add_argument("--anos-considerados-anterior", type=int,
+                   help="anos de carreira que a prestacao anterior teve em conta para o "
+                        "acrescimo (art. 37.o n.o 4)")
     p.add_argument("--json", action="store_true")
     p.add_argument("--recusas", action="store_true", help="listar portas de recusa e sair")
     p.add_argument("--tabela", action="store_true", help="imprimir a tabela do art. 37.o")
@@ -492,11 +687,23 @@ def main(argv=None):
                 "remuneracao_total_12m": args.remuneracao_total_12m,
                 "anos_carreira_ultimos_20": args.anos_carreira_20,
                 "remuneracoes_atingem_rmmg": True if args.atinge_rmmg else None}
+        sn = {"sim": True, "nao": False, None: None}
+        for chave, v in (("beneficio_anterior", sn[args.beneficio_anterior]),
+                         ("meses_com_registo_apos_anterior", args.meses_apos_anterior),
+                         ("anos_carreira_apos_anterior", args.anos_apos_anterior),
+                         ("retomou_nos_primeiros_6_meses", sn[args.retomou_6_meses]),
+                         ("meses_considerados_no_anterior", args.meses_considerados_anterior),
+                         ("anos_considerados_no_anterior", args.anos_considerados_anterior)):
+            if v is not None:
+                caso[chave] = v
     else:
         p.error("indique --caso FICHEIRO ou --idade --dias-trabalho-24m "
                 "--meses-com-registo --remuneracao-total-12m")
 
-    out = analisar(caso, const)
+    try:
+        out = analisar(caso, const)
+    except ValueError as e:
+        p.error(str(e))
     print(json.dumps(out, ensure_ascii=False, indent=2) if args.json else _render(out))
     return 0
 

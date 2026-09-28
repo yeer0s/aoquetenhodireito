@@ -58,9 +58,11 @@ responsabilidade são o mesmo facto visto de dois lados.
 
 ### 4. Limites conhecidos, declarados
 
-- O **art. 37.º n.os 3 a 5** não está modelado. Quem já recebeu subsídio de
-  desemprego antes, ou retomou trabalho durante a atribuição, pode ter uma
-  duração **menor** do que a calculada.
+- O **art. 37.º n.os 3 e 4** só é aplicado se **declarar** que já recebeu
+  prestações de desemprego, e com os meses e anos de registo que indicar. Se não o
+  declarar, a duração é o cálculo bruto e pode ser **menor**. O **n.º 5** não está
+  modelado (só pode alongar). O **art. 36.º n.º 5** (dias deduzidos por
+  requerimento fora de prazo) também não — pode encurtar.
 - O **subsídio social de desemprego** é porta de recusa: a escala de equivalência
   da condição de recursos (DL n.º 70/2010) não está capturada.
 - O texto legal em `assets/law/` vem do **Diário da República** (versão
@@ -118,9 +120,11 @@ can validate it either.
 
 ### 4. Declared limits
 
-Art. 37.º n.os 3–5 (prior unemployment spells, returning to work during payment)
-is **not modelled** — a previous claim may mean a **shorter** duration than
-calculated. The social unemployment benefit is a refusal gate. IAS and RMMG change
+Art. 37.º n.os 3–4 (prior unemployment spells, returning to work in the first six
+months) is applied **only if you declare** the prior benefit and the months and
+years you enter; undeclared, the duration may be **shorter** than calculated.
+N.º 5 is **not modelled** (it can only lengthen); nor is art. 36.º n.º 5 (days
+deducted for a late claim), which can shorten. The social unemployment benefit is a refusal gate. IAS and RMMG change
 annually. No test case comes from a real Social Security decision.
 
 ### 5. No warranty
