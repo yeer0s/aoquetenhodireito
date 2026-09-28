@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg" alt="MIT">
   <img src="https://img.shields.io/badge/depend%C3%AAncias-0-brightgreen.svg" alt="zero dependências">
   <img src="https://img.shields.io/badge/rede-nenhuma-brightgreen.svg" alt="sem rede">
-  <img src="https://img.shields.io/badge/verifica%C3%A7%C3%B5es-33-brightgreen.svg" alt="33 verificações">
+  <img src="https://img.shields.io/badge/verifica%C3%A7%C3%B5es-37-brightgreen.svg" alt="37 verificações">
 </p>
 
 <p align="center">
@@ -104,12 +104,12 @@ Uma ferramenta que responde a tudo está a mentir sobre alguma coisa.
 Não por a suite estar verde. Por ela **saber ficar vermelha**:
 
 ```bash
-python scripts/oracle.py --crosscheck      # 4704 combinações, dois caminhos independentes
+python scripts/oracle.py --crosscheck      # 108960 combinações, dois caminhos independentes
 python scripts/oracle.py --mutation-test   # repõe a majoração morta de 2012/13 e exige vermelho
 python scripts/oracle.py --blind-spots     # o que este motor NÃO cobre
 python scripts/sweep.py --self-test        # prova que o gate sabe falhar e voltar a passar
 python scripts/mutants.py                  # mutantes contra os invariantes de produto
-python scripts/sweep.py                    # 33 verificações
+python scripts/sweep.py                    # 37 verificações
 python scripts/offline_audit.py            # prova estática: sem caminho de importação para a rede
 ```
 
@@ -128,8 +128,9 @@ python scripts/offline_audit.py            # prova estática: sem caminho de imp
   duração também**; nunca prometer um montante; declarar sempre que a estimativa
   assume desemprego involuntário nos termos do art. 9.º; explicar sempre a janela
   de R do art. 28.º n.º 4; encaminhar sempre para o subsídio social quem falha o
-  prazo; avisar sempre que o art. 36.º n.º 1 conta desde o **requerimento**. Cada
-  um tem um mutante que prova que a verificação morde.
+  prazo; avisar sempre que o art. 36.º n.º 1 conta desde o **requerimento**;
+  declarar uma prestação anterior **nunca alonga** a duração, e encurta-a quando o
+  art. 37.º n.º 3 o manda. Cada um tem um mutante que prova que a verificação morde.
 
 ## Totalmente offline — por estrutura, não por promessa
 

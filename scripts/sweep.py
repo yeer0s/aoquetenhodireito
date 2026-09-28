@@ -187,8 +187,9 @@ def correr(hoje=None):
     check("declara-a-assuncao-de-involuntariedade", not sem_assuncao,
           "casos: %s" % sem_assuncao)
 
-    # (d3) A duracao tambem e um limite superior (art. 37.o n.os 3-5, nao modelado).
-    #      Estava declarado nos documentos e ausente da saida que o utilizador le.
+    # (d3) A duracao tambem e um limite superior: sem historico declarado o art.
+    #      37.o n.o 3 nao se aplica, e o art. 36.o n.o 5 nunca e modelado. Estava
+    #      declarado nos documentos e ausente da saida que o utilizador le.
     sem_cav_dur = [c["id"] for c in golden["cases"]
                    if desemprego.analisar(c["caso"], const)["estado"] == "TEM_DIREITO"
                    and "a_duracao_tambem_pode_ser_menor"
@@ -217,6 +218,81 @@ def correr(hoje=None):
         if q > 4:
             excesso.append("idade=%d: %d quinquenios, maximo legal 4" % (idade, q))
     check("acrescimo-limitado-a-4-quinquenios", not excesso, "; ".join(excesso))
+
+    # (d6) Art. 37.o n.os 3-4. Tres invariantes de COMPORTAMENTO, mais uma porta.
+    #      Nenhum repete a aritmetica do motor: dizem o que um historico declarado
+    #      pode e nao pode fazer ao numero que uma pessoa le.
+    def _dias(idade, meses, anos, h):
+        return desemprego.duracao(idade, meses, anos, h)["dias_total"]
+
+    #   (i) Declarar uma prestacao anterior NUNCA pode dar mais dias do que o
+    #       calculo bruto: os n.os 3-4 so escolhem PARTES do registo declarado.
+    alonga = []
+    for idade in (25, 35, 45, 55):
+        for meses, anos in ((10, 0), (20, 10), (30, 20), (60, 12)):
+            bruto = _dias(idade, meses, anos, {})
+            for m_apos, a_apos in ((0, 0), (14, 4), (24, 9), (40, 25)):
+                h = {"beneficio_anterior": True,
+                     "meses_com_registo_apos_anterior": m_apos,
+                     "anos_carreira_apos_anterior": a_apos}
+                for extra in ({}, {"retomou_nos_primeiros_6_meses": True,
+                                   "meses_considerados_no_anterior": 40,
+                                   "anos_considerados_no_anterior": 16}):
+                    v = _dias(idade, meses, anos, dict(h, **extra))
+                    if v > bruto:
+                        alonga.append("idade=%d meses=%d anos=%d h=%s -> %d > bruto %d"
+                                      % (idade, meses, anos, sorted(dict(h, **extra).items()),
+                                         v, bruto))
+    check("art-37-3-nunca-alonga-a-duracao", not alonga, "; ".join(alonga[:4]))
+
+    #  (ii) ...e tem de ENCURTAR quando o registo posterior ao termo cai numa celula
+    #       inferior ou em menos quinquenios. Sem isto, ignorar o n.o 3 passava (i).
+    nao_encurta = []
+    for idade in (25, 35, 45, 55):
+        bruto = _dias(idade, 60, 20, {})
+        for m_apos, a_apos in ((10, 20), (60, 4), (18, 9)):
+            v = _dias(idade, 60, 20, {"beneficio_anterior": True,
+                                      "meses_com_registo_apos_anterior": m_apos,
+                                      "anos_carreira_apos_anterior": a_apos})
+            if not v < bruto:
+                nao_encurta.append("idade=%d apos=(%d,%d) -> %d, bruto %d"
+                                   % (idade, m_apos, a_apos, v, bruto))
+    check("art-37-3-encurta-quando-deve", not nao_encurta, "; ".join(nao_encurta[:4]))
+
+    # (iii) Sem o facto, o numero e o de sempre e a saida NOMEIA a regra que o pode
+    #       encurtar. Um silencio aqui e uma promessa de duracao sem ressalva.
+    ausente = []
+    for idade, meses, anos in ((25, 14, 2), (35, 24, 12), (55, 24, 20)):
+        v = _dias(idade, meses, anos, {})
+        if v != sum(desemprego.periodo_concessao(idade, meses, anos)[:2]):
+            ausente.append("idade=%d: %d difere do calculo bruto" % (idade, v))
+        out = desemprego.analisar({"idade": idade, "dias_trabalho_24m": 720,
+                                   "meses_com_registo": meses,
+                                   "remuneracao_total_12m": 16800,
+                                   "anos_carreira_ultimos_20": anos}, const)
+        t = out.get("a_duracao_tambem_pode_ser_menor", "")
+        if "37.o n.o 3" not in t or "--beneficio-anterior" not in t:
+            ausente.append("idade=%d: a saida nao nomeia o art. 37.o n.o 3" % idade)
+    check("art-37-3-ausente-igual-a-v1-e-avisa", not ausente, "; ".join(ausente))
+
+    #  (iv) Declarar uma prestacao anterior SEM dizer quanto registo houve depois
+    #       tem de rebentar: cair na contagem bruta seria usar a contagem que o n.o 3
+    #       proibe, em silencio. O mesmo para um facto mal tipado.
+    nao_rebentou = []
+    base_caso = {"idade": 35, "dias_trabalho_24m": 720, "meses_com_registo": 24,
+                 "remuneracao_total_12m": 16800, "anos_carreira_ultimos_20": 12}
+    for extra in ({"beneficio_anterior": True},
+                  {"beneficio_anterior": True, "meses_com_registo_apos_anterior": 10},
+                  {"beneficio_anterior": "sim", "meses_com_registo_apos_anterior": 10,
+                   "anos_carreira_apos_anterior": 1},
+                  {"meses_com_registo_apos_anterior": 10}):
+        try:
+            desemprego.analisar(dict(base_caso, **extra), const)
+            nao_rebentou.append(sorted(extra))
+        except ValueError:
+            pass
+    check("art-37-3-declarado-sem-contagem-rebenta", not nao_rebentou,
+          "nao rebentou: %s" % nao_rebentou)
 
     # (e) Direccao do erro, testada em COMPORTAMENTO e nao declarada numa string:
     #     mais salario nunca pode dar menos subsidio, e mais carreira nunca pode

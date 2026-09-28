@@ -82,6 +82,40 @@ def duracao_oracle(idade, meses, anos20):
     return _DIAS[fi][fm] + _PASSO[fi] * (min(int(anos20), 20) // 5)
 
 
+# Art. 37.o n.os 3 e 4, lidos do texto como um conjunto de PERIODOS que a lei
+# admite na contagem, e nao como ajustes a um numero:
+#
+#   n.o 3  "sao considerados os periodos de registo de remuneracoes posteriores ao
+#          termo da concessao das prestacoes devidas pela ultima situacao de
+#          desemprego"                        -> admite-se o periodo POSTERIOR
+#   n.o 4  "e considerado ainda ... o periodo de remuneracoes tido em conta na
+#          atribuicao da prestacao de desemprego imediatamente anterior", se
+#          retomou "no decurso dos primeiros seis meses"  -> admite-se TAMBEM esse
+#
+# Sem prestacao anterior (ou sem o saber) o periodo admitido e o total declarado.
+# Os periodos admitidos somam-se e nunca excedem o total declarado: a parte de um
+# todo nao pode ser maior do que o todo, e onde o texto nao diz se a janela de 20
+# anos se aplica ao periodo do n.o 4, fica a leitura mais curta.
+
+def periodos_admitidos_oracle(meses_total, anos_total, h):
+    if h.get("beneficio_anterior") is not True:
+        admitidos = [(meses_total, anos_total)]
+    else:
+        admitidos = [(h["meses_com_registo_apos_anterior"], h["anos_carreira_apos_anterior"])]
+        anterior = (h.get("meses_considerados_no_anterior"),
+                    h.get("anos_considerados_no_anterior"))
+        if h.get("retomou_nos_primeiros_6_meses") is True and None not in anterior:
+            admitidos.append(anterior)
+    meses = sum(p[0] for p in admitidos)
+    anos = sum(p[1] for p in admitidos)
+    return sorted([meses, meses_total])[0], sorted([anos, anos_total])[0]
+
+
+def duracao_oracle_hist(idade, meses_total, anos_total, h):
+    meses, anos = periodos_admitidos_oracle(meses_total, anos_total, h)
+    return duracao_oracle(idade, meses, anos)
+
+
 # -------------------------------------------------------------- pontos cegos
 
 BLIND_SPOTS = [
@@ -96,9 +130,24 @@ BLIND_SPOTS = [
     "Nenhum caso dourado vem de uma decisao real da Seguranca Social. O corpus prova "
     "coerencia com o texto legal, nao com a pratica do ISS.",
 
-    "O art. 37.o n.os 3, 4 e 5 (periodos ja usados em desemprego anterior, retoma de "
-    "trabalho nos primeiros seis meses, acrescimos nao gozados) NAO estao modelados. "
-    "Quem ja recebeu subsidio antes pode ter uma duracao MENOR do que a calculada.",
+    "O art. 37.o n.os 3 e 4 estao modelados, mas so com o que o utilizador declara: "
+    "sem --beneficio-anterior o motor usa a contagem bruta e AVISA que a duracao pode "
+    "ser MENOR; com ele, os meses e anos posteriores ao termo da concessao anterior "
+    "sao numeros do utilizador que o motor nao consegue verificar. Onde o texto nao "
+    "diz se a janela de 20 anos do n.o 2 se aplica ao periodo do n.o 4, nem se o "
+    "'termo' e o fim do pagamento ou do periodo concedido, fica a leitura mais curta.",
+
+    "O art. 37.o n.o 5 (acrescimos nao gozados por retoma antes de esgotar a prestacao "
+    "anterior) NAO e modelado: o texto nao diz como dias nao gozados se convertem em "
+    "periodos de registo. So pode ALONGAR a duracao - o erro fica do lado seguro.",
+
+    "O art. 22.o n.o 1 capturado nao diz se os dias ja tidos em conta numa prestacao "
+    "anterior contam de novo para o prazo de garantia. Com --beneficio-anterior o "
+    "motor avisa; nao decide.",
+
+    "O art. 36.o n.o 5 (dias deduzidos ao periodo de concessao por requerimento ou "
+    "provas fora de prazo, nas situacoes do art. 72.o n.o 2, nao capturado) NAO e "
+    "modelado. A duracao pode ser MENOR por essa razao.",
 
     "O subsidio social de desemprego (arts. 24.o, 30.o, 38.o) e porta de recusa: a "
     "escala de equivalencia da condicao de recursos (DL n.o 70/2010) nao esta capturada.",
@@ -119,6 +168,32 @@ def _grelha():
     return itertools.product(idades, meses, anos20, Rs)
 
 
+def _historicos():
+    """Todas as formas do facto: ausente, negado, e declarado com e sem n.o 4."""
+    yield {}
+    yield {"beneficio_anterior": False}
+    for m_apos, a_apos in itertools.product([0, 14, 15, 23, 24, 40], [0, 4, 5, 19, 25]):
+        base = {"beneficio_anterior": True,
+                "meses_com_registo_apos_anterior": m_apos,
+                "anos_carreira_apos_anterior": a_apos}
+        yield dict(base)
+        yield dict(base, retomou_nos_primeiros_6_meses=False)
+        yield dict(base, retomou_nos_primeiros_6_meses=True)   # sem contagens: so n.o 3
+        for m_ant, a_ant in itertools.product([1, 10, 24], [0, 5, 16]):
+            yield dict(base, retomou_nos_primeiros_6_meses=True,
+                       meses_considerados_no_anterior=m_ant,
+                       anos_considerados_no_anterior=a_ant)
+
+
+def _grelha_historico():
+    idades = [18, 29, 30, 39, 40, 49, 50, 64]
+    meses = [0, 14, 15, 23, 24, 36]
+    anos20 = [0, 4, 5, 10, 20, 30]
+    for idade, m, a in itertools.product(idades, meses, anos20):
+        for h in _historicos():
+            yield idade, m, a, h
+
+
 def crosscheck(const):
     ias = const["IAS"]["valor"]
     falhas, total = [], 0
@@ -135,7 +210,20 @@ def crosscheck(const):
             if base + acr != d:
                 falhas.append("duracao idade=%d meses=%d anos20=%d motor=%d oraculo=%d"
                               % (idade, meses, anos20, base + acr, d))
-    print("crosscheck: %d combinacoes" % total)
+    # Art. 37.o n.os 3 e 4: o historico de prestacoes anteriores, contra o caminho
+    # que le o artigo como periodos admitidos. O motor e chamado pela mesma funcao
+    # que o analisar() usa, nao por uma copia.
+    total_hist = 0
+    for idade, meses, anos20, h in _grelha_historico():
+        total_hist += 1
+        a = desemprego.duracao(idade, meses, anos20, h)["dias_total"]
+        b = duracao_oracle_hist(idade, meses, anos20, h)
+        if a != b:
+            falhas.append("art37-3/4 idade=%d meses=%d anos20=%d hist=%s motor=%d oraculo=%d"
+                          % (idade, meses, anos20, sorted(h.items()), a, b))
+    print("crosscheck: %d combinacoes (%d montante/duracao + %d historico art. 37.o n.os 3-4)"
+          % (total + total_hist, total, total_hist))
+    total += total_hist
     if falhas:
         for f in falhas[:20]:
             print("  DIVERGENCIA " + f)
