@@ -75,6 +75,16 @@ def m_beco_sem_saida():
     return _patch_analisar(t)
 
 
+def m_sem_aviso_do_fim_do_social():
+    """Encaminha para o subsidio social sem avisar que o DL 166/2026 o extingue a 31-12-2026."""
+    def t(out):
+        if out["estado"] == "NAO_CUMPRE_PRAZO_DE_GARANTIA":
+            out["o_que_isto_significa"] = \
+                out["o_que_isto_significa"].split(" ATENCAO:")[0]
+        return out
+    return _patch_analisar(t)
+
+
 def m_sem_aviso_do_requerimento():
     """Deixa de avisar que o art. 36.º n.º 1 conta desde o REQUERIMENTO."""
     def t(out):
@@ -264,6 +274,8 @@ MUTANTES = [
      "valor-sempre-rotulado-como-limite-superior"),
     ("promete-o-valor", m_promete_o_valor, "nunca-promete-um-valor"),
     ("beco-sem-saida", m_beco_sem_saida, "falhar-o-prazo-encaminha-para-o-social"),
+    ("sem-aviso-do-fim-do-social", m_sem_aviso_do_fim_do_social,
+     "falhar-o-prazo-avisa-o-fim-do-social"),
     ("sem-aviso-do-requerimento", m_sem_aviso_do_requerimento,
      "avisa-que-conta-desde-o-requerimento"),
     ("mais-salario-menos-subsidio", m_mais_salario_menos_subsidio,

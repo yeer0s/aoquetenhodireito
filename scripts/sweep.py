@@ -165,6 +165,19 @@ def correr(hoje=None):
                 becos.append(c["id"])
     check("falhar-o-prazo-encaminha-para-o-social", not becos, "casos: %s" % becos)
 
+    # (c2) O DL 166/2026 revoga o art. 22.o n.os 2-4 e o art. 24.o com efeitos a
+    #      31-12-2026 (sucessor: art. 27.o desse decreto-lei, PSU). Encaminhar para
+    #      o subsidio social sem o dizer sobrestima o direito - a direccao perigosa.
+    sem_aviso = []
+    for c in golden["cases"]:
+        out = desemprego.analisar(c["caso"], const)
+        if out["estado"] == "NAO_CUMPRE_PRAZO_DE_GARANTIA":
+            t = out["o_que_isto_significa"]
+            if "166/2026" not in t or "31-12-2026" not in t:
+                sem_aviso.append(c["id"])
+    check("falhar-o-prazo-avisa-o-fim-do-social", not sem_aviso,
+          "casos: %s" % sem_aviso)
+
     # (d) O art. 36.o n.o 1 conta desde o REQUERIMENTO. Nao avisar custa dinheiro
     #     real por cada dia de atraso.
     sem_prazo = [c["id"] for c in golden["cases"]
