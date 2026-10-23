@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/licen%C3%A7a-MIT-blue.svg" alt="MIT">
   <img src="https://img.shields.io/badge/depend%C3%AAncias-0-brightgreen.svg" alt="zero dependências">
   <img src="https://img.shields.io/badge/rede-nenhuma-brightgreen.svg" alt="sem rede">
-  <img src="https://img.shields.io/badge/verifica%C3%A7%C3%B5es-37-brightgreen.svg" alt="37 verificações">
+  <img src="https://img.shields.io/badge/verifica%C3%A7%C3%B5es-38-brightgreen.svg" alt="38 verificações">
 </p>
 
 <p align="center">
@@ -85,6 +85,20 @@ baixa-o para **120 dias** quando o desemprego vem da caducidade de um contrato a
 termo. Quem parar de ler no «não tem direito» perde uma prestação a que pode ter
 direito — e há uma verificação que falha se essa saída não o disser.
 
+**Este caminho fecha a 31 de dezembro de 2026.** O Decreto-Lei n.º 166/2026, de
+13 de agosto, revoga os n.os 2 a 4 do art. 22.º e o art. 24.º com efeitos nessa
+data, e o subsídio social de desemprego acaba. Quem já o recebe nessa data
+mantém-no até ao fim do período (art. 61.º n.º 2 do Decreto-Lei n.º 166/2026); um
+pedido ainda pendente nessa data não fica claramente abrangido — pergunte à
+Segurança Social. O sucessor é a majoração por desemprego dentro da nova prestação
+social única (PSU), uma prestação do agregado sujeita a condição de recursos (art.
+27.º do Decreto-Lei n.º 166/2026): completa a PSU do agregado até 80 % do IAS, só
+nos primeiros seis meses da PSU e — se não houve antes subsídio de desemprego —
+só com 120 dias de trabalho por conta de outrem nos 12 meses anteriores ao
+desemprego. Os prazos de garantia, montantes e períodos do subsídio de desemprego
+que esta ferramenta calcula não mudam. A saída já avisa, e há uma verificação que
+falha se deixar de avisar.
+
 ## O que se recusa a calcular
 
 | Facto | Porquê | Artigo |
@@ -109,7 +123,7 @@ python scripts/oracle.py --mutation-test   # repõe a majoração morta de 2012/
 python scripts/oracle.py --blind-spots     # o que este motor NÃO cobre
 python scripts/sweep.py --self-test        # prova que o gate sabe falhar e voltar a passar
 python scripts/mutants.py                  # mutantes contra os invariantes de produto
-python scripts/sweep.py                    # 37 verificações
+python scripts/sweep.py                    # 38 verificações
 python scripts/offline_audit.py            # prova estática: sem caminho de importação para a rede
 ```
 
