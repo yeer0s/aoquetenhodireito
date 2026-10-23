@@ -121,7 +121,7 @@ python scripts/oracle.py --mutation-test   # repõe a majoração morta de 2012/
 python scripts/oracle.py --blind-spots     # o que este motor NÃO cobre
 python scripts/sweep.py --self-test        # prova que o gate sabe falhar e voltar a passar
 python scripts/mutants.py                  # mutantes contra os invariantes de produto
-python scripts/sweep.py                    # 37 verificações
+python scripts/sweep.py                    # 38 verificações
 python scripts/offline_audit.py            # prova estática: sem caminho de importação para a rede
 ```
 
@@ -223,7 +223,7 @@ dedicada a vermelho ao mesmo tempo.
 **Uma contagem que estava errada:** a v1.0.0 dizia «23 casos dourados»; eram 24.
 Nenhuma verificação lia esse número. Agora são 30.
 
-**Estado:** 30 casos dourados, 37 verificações, 17 mutantes, 108960 combinações.
+**Estado:** 30 casos dourados, 38 verificações, 18 mutantes, 108960 combinações.
 
 **Limites que continuam declarados:** o tecto do art. 29.º n.os 2–3; o art. 37.º
 n.º 5; o art. 36.º n.º 5 (dias deduzidos por requerimento fora de prazo, via art.

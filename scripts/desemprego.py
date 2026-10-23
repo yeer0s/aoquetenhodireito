@@ -348,7 +348,11 @@ RECUSAS = [
      "O art. 24.o n.o 2 fixa o limiar em 80 % do IAS mas remete a capitacao para a "
      "escala de equivalencia da lei da condicao de recursos (DL n.o 70/2010), que NAO "
      "esta capturada neste repositorio. Calcular a capitacao sem essa escala daria um "
-     "numero inventado. O limiar por pessoa e indicado abaixo, a titulo indicativo.",
+     "numero inventado. O limiar por pessoa e indicado abaixo, a titulo indicativo. "
+     "ATENCAO: o art. 24.o e revogado pelo Decreto-Lei n.o 166/2026 com efeitos a "
+     "31-12-2026 e o subsidio social de desemprego acaba nessa data (quem ja o recebe "
+     "mantem-no ate ao fim do periodo; o sucessor e a majoracao por desemprego do "
+     "art. 27.o desse decreto-lei, na prestacao social unica).",
      "24.o n.o 2"),
 ]
 
@@ -413,7 +417,16 @@ def analisar(caso, const=None):
             "dias em 12 meses para o SUBSIDIO SOCIAL de desemprego, e o n.o 3 baixa-o "
             "para 120 dias quando o desemprego resulta de caducidade de contrato a termo. "
             "Esses dependem de condicao de recursos (art. 24.o), que este motor nao "
-            "calcula. Va a Seguranca Social - pode ter direito a uma prestacao diferente."
+            "calcula. Va a Seguranca Social - pode ter direito a uma prestacao diferente. "
+            "ATENCAO: o Decreto-Lei n.o 166/2026 revoga os n.os 2 a 4 do art. 22.o e o "
+            "art. 24.o com efeitos a 31-12-2026: o subsidio social de desemprego acaba "
+            "nessa data (quem ja o recebe mantem-no ate ao fim, art. 61.o n.o 2 desse "
+            "decreto-lei; um pedido ainda pendente nao fica claramente abrangido). O "
+            "sucessor e a majoracao por desemprego da prestacao social unica, prestacao "
+            "do agregado com condicao de recursos (art. 27.o do Decreto-Lei n.o 166/2026): "
+            "completa a PSU do agregado ate 80 %% do IAS, so nos primeiros seis meses da "
+            "PSU, e exige 120 dias de trabalho por conta de outrem nos 12 meses anteriores "
+            "ao desemprego quando nao houve subsidio de desemprego antes."
             % dias)
         return _rodape(out)
 

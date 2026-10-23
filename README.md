@@ -13,7 +13,7 @@
   <a href="#licença--licence"><img src="https://img.shields.io/badge/licence-MIT-blue.svg" alt="MIT"></a>
   <img src="https://img.shields.io/badge/dependencies-0-brightgreen.svg" alt="zero dependencies">
   <img src="https://img.shields.io/badge/network-none-brightgreen.svg" alt="no network">
-  <img src="https://img.shields.io/badge/checks-37-brightgreen.svg" alt="37 checks">
+  <img src="https://img.shields.io/badge/checks-38-brightgreen.svg" alt="38 checks">
   <img src="https://img.shields.io/badge/statute-consolidated%20DR-informational.svg" alt="statute">
 </p>
 
@@ -96,6 +96,20 @@ n.º 3 drops it to **120 days** where the job ended by expiry of a fixed-term
 contract. Anyone who stops reading at "you don't qualify" loses a benefit they may
 be entitled to — and a check fails if that output doesn't say so.
 
+**This route closes on 31 December 2026.** Decreto-Lei n.º 166/2026, de 13 de
+agosto, revokes art. 22.º n.os 2–4 and art. 24.º with effect from that date, and
+the social unemployment benefit ends. People already receiving it on that date
+keep it to the end of their period (art. 61.º n.º 2 do Decreto-Lei n.º 166/2026);
+a claim still pending then is not clearly covered — ask Segurança Social. The
+successor is the *majoração por desemprego* inside the new *prestação social
+única* (PSU), a means-tested household benefit (art. 27.º do Decreto-Lei n.º
+166/2026): it tops the household's PSU up to 80 % of the IAS, only during the
+first six months of the PSU, and — where no unemployment benefit was granted
+before — only with 120 days of employed work in the 12 months before the
+unemployment. The qualifying periods, amounts and durations of the
+contribution-based benefit this tool computes are not changed. The output already
+warns about this, and a check fails if it stops.
+
 ## What it refuses to compute
 
 | Fact | Why | Article |
@@ -120,7 +134,7 @@ python scripts/oracle.py --mutation-test   # restores the dead 2012/13 uplift, d
 python scripts/oracle.py --blind-spots     # what this engine does NOT cover
 python scripts/sweep.py --self-test        # proves the gate can fail and recover
 python scripts/mutants.py                  # mutants against the product invariants
-python scripts/sweep.py                    # 37 checks
+python scripts/sweep.py                    # 38 checks
 python scripts/offline_audit.py            # static proof: no import/call path to the network
 ```
 
